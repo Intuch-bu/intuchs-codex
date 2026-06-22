@@ -3,7 +3,7 @@ import heroImg from "@/assets/hero.png";
 export function HeroSection() {
     return (
       <section className="w-full">
-        <div className="mx-auto flex max-w-[1366px] flex-col items-center justify-center gap-10 px-25 py-10 lg:flex-row lg:gap-8">
+        <div className="mx-auto flex max-w-[1366px] flex-col items-center justify-center gap-10 px-10 py-10 lg:flex-row lg:gap-8">
           <div className="max-w-sm text-right">
             <h1 className="text-4xl font-bold leading-tight lg:text-5xl">
               Stay Informed,
