@@ -1,12 +1,15 @@
-import { Button } from "@/components/ui/button"
+import Navbar from "@/components/navbar";
+import HeroSection from "@/components/heroSection";
+import ArticleSection from "@/components/articleSection";
+import Footer from "@/components/footer";
 
 function App() {
   return (
     <>
-      <section className="flex justify-center items-center h-screen flex-col gap-4">
-        <h1 className="text-2xl font-bold">My First React App on Vite</h1>
-        <Button>Click me</Button>
-      </section>
+      <Navbar />
+      <HeroSection />
+      <ArticleSection />
+      <Footer />
     </>
   );
 }
