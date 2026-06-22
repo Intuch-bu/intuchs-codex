@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 
-export function Navbar() {
+function Navbar() {
     return (
       <nav className="w-full border-b border-gray-200">
         <div className="mx-auto flex max-w-[1366px] items-center justify-between px-10 py-4">
@@ -13,3 +13,5 @@ export function Navbar() {
       </nav>
     );
   }
+
+export default Navbar;
