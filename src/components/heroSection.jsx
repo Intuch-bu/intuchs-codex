@@ -3,7 +3,7 @@ import heroImg from "@/assets/hero.jpg";
 function HeroSection() {
   return (
     <section className="w-full">
-      <div className="mx-auto flex max-w-[1366px] flex-col items-center justify-center gap-10 px-10 py-10 lg:flex-row lg:gap-8">
+      <div className="mx-auto flex max-w-[1366px] flex-col items-center justify-center gap-10 px-10 py-12 lg:flex-row lg:gap-8">
         <div className="max-w-sm text-right">
           <h1 className="text-2xl font-bold leading-tight lg:text-3xl">
             Seek Knowledge.
@@ -17,7 +17,7 @@ function HeroSection() {
         </div>
 
         <img
-          className="w-[340px] h-[466px] rounded-lg"
+          className="w-full max-w-[340px] h-auto rounded-lg object-contain"
           src={heroImg}
           alt="Hero"
         />
