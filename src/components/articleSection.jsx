@@ -1,17 +1,37 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CategorySelector from "@/components/categorySelector";
 import BlogCard from "@/components/blogCard";
-import { blogPosts } from "@/assets/blogPosts";
+import { formatDate } from "@/lib/formatDate";
+import { fetchPosts } from "@/services/blogApi";
 
 const categories = ["Highlight", "Cat", "Inspiration", "General"];
 
 function ArticleSection() {
   const [selectedCategory, setSelectedCategory] = useState("Highlight");
+  const [posts, setPosts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefetching, setIsRefetching] = useState(false);
 
-  const filteredPosts =
-    selectedCategory === "Highlight"
-      ? blogPosts
-      : blogPosts.filter((post) => post.category === selectedCategory);
+  useEffect(() => {
+    const loadPosts = async () => {
+      setIsRefetching(true);
+
+      try {
+        const data = await fetchPosts({ category: selectedCategory });
+        setPosts(data.posts ?? []);
+      } catch (error) {
+        console.error("Failed to fetch posts:", error);
+        setPosts([]);
+      } finally {
+        setIsLoading(false);
+        setIsRefetching(false);
+      }
+    };
+
+    loadPosts();
+  }, [selectedCategory]);
+
+  const showInitialLoading = isLoading && posts.length === 0;
 
   return (
     <section className="w-full">
@@ -24,11 +44,23 @@ function ArticleSection() {
           onCategoryChange={setSelectedCategory}
         />
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {filteredPosts.map((post) => (
-            <BlogCard key={post.id} {...post} />
-          ))}
-        </div>
+        {showInitialLoading ? (
+          <p className="text-muted-foreground">Loading articles...</p>
+        ) : (
+          <div
+            className={`grid grid-cols-1 gap-4 transition-opacity md:grid-cols-2 ${
+              isRefetching ? "pointer-events-none opacity-60" : ""
+            }`}
+          >
+            {posts.map((post) => (
+              <BlogCard
+                key={post.id}
+                {...post}
+                date={formatDate(post.date)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
