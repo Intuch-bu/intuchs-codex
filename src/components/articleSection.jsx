@@ -8,6 +8,11 @@ const categories = ["Highlight", "Cat", "Inspiration", "General"];
 function ArticleSection() {
   const [selectedCategory, setSelectedCategory] = useState("Highlight");
 
+  const filteredPosts =
+    selectedCategory === "Highlight"
+      ? blogPosts
+      : blogPosts.filter((post) => post.category === selectedCategory);
+
   return (
     <section className="w-full">
       <div className="mx-auto max-w-[1366px] px-10 py-8 flex flex-col gap-6">
@@ -20,7 +25,7 @@ function ArticleSection() {
         />
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {blogPosts.map((post) => (
+          {filteredPosts.map((post) => (
             <BlogCard key={post.id} {...post} />
           ))}
         </div>
