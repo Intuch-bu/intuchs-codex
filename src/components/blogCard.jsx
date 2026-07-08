@@ -13,7 +13,7 @@ function BlogCard({ image, category, title, description, author, date }) {
               {title}
             </h2>
           </a>
-          <p className="text-muted-foreground text-sm mb-4 flex-grow line-clamp-3">
+          <p className="text-muted-foreground text-sm mb-4 grow line-clamp-3">
             {description}
           </p>
           <div className="flex items-center text-sm">

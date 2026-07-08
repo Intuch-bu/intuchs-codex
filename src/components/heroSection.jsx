@@ -24,7 +24,7 @@ function HeroSection() {
 
         <div className="max-w-sm">
           <p className="text-xs text-muted-foreground">-Author</p>
-          <h2 className="mt-1 text-2xl font-bold">Intuch B</h2>
+          <h2 className="mt-1 text-2xl font-bold">Intuch B.</h2>
           <p className="mt-4 text-muted-foreground">
             Aspiring Full-Stack Developer
           </p>

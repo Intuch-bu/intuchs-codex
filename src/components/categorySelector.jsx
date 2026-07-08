@@ -8,25 +8,31 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-function CategorySelector({ categories, defaultValue }) {
+function CategorySelector({ categories, selectedCategory, onCategoryChange }) {
   return (
     <div className="mt-4 rounded-2xl bg-muted px-4 py-4 md:px-6">
       {/* Desktop: category buttons + search */}
       <div className="hidden items-center justify-between gap-4 md:flex">
         <div className="flex items-center gap-2">
-          {categories.map((category, index) => (
-            <button
-              key={category}
-              type="button"
-              className={
-                index === 0
-                  ? "rounded-lg bg-background px-4 py-2 text-sm font-medium text-foreground"
-                  : "rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-background/60"
-              }
-            >
-              {category}
-            </button>
-          ))}
+          {categories.map((category) => {
+            const isSelected = category === selectedCategory;
+
+            return (
+              <button
+                key={category}
+                type="button"
+                disabled={isSelected}
+                onClick={() => onCategoryChange(category)}
+                className={
+                  isSelected
+                    ? "rounded-lg bg-background px-4 py-2 text-sm font-medium text-foreground"
+                    : "rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-background/60"
+                }
+              >
+                {category}
+              </button>
+            );
+          })}
         </div>
 
         <div className="relative w-full max-w-sm">
@@ -54,9 +60,9 @@ function CategorySelector({ categories, defaultValue }) {
           <label className="text-sm font-medium text-muted-foreground">
             Category
           </label>
-          <Select defaultValue={defaultValue}>
+          <Select value={selectedCategory} onValueChange={onCategoryChange}>
             <SelectTrigger className="h-11 w-full rounded-lg border-border bg-background">
-              <SelectValue placeholder={defaultValue} />
+              <SelectValue placeholder="Highlight" />
             </SelectTrigger>
             <SelectContent>
               {categories.map((category) => (
