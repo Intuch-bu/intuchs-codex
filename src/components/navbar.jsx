@@ -11,7 +11,9 @@ function Navbar() {
     <nav className="w-full border-b border-gray-200">
       <div className="mx-auto max-w-[1366px] px-10 py-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Intuch's Codex</h1>
+          <h1 className="text-2xl font-bold">
+            Intuch<span className="text-teal-500">'</span>s Codex
+          </h1>
 
           <div className="hidden gap-4 md:flex">
             <Button variant="outline">Log in</Button>
@@ -20,7 +22,7 @@ function Navbar() {
 
           <DropdownMenu>
             <DropdownMenuTrigger
-              className="p-1 md:hidden"
+              className="cursor-pointer p-1 md:hidden"
               aria-label="Open menu"
             >
               <Menu />

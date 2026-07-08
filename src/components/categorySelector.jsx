@@ -26,7 +26,7 @@ function CategorySelector({ categories, selectedCategory, onCategoryChange }) {
                 className={
                   isSelected
                     ? "rounded-lg bg-background px-4 py-2 text-sm font-medium text-foreground"
-                    : "rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-background/60"
+                    : "cursor-pointer rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-background/60"
                 }
               >
                 {category}
