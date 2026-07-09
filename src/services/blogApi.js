@@ -12,3 +12,8 @@ export async function fetchPosts({ page = 1, limit = 6, category } = {}) {
   const { data } = await axios.get(`${API_BASE_URL}/posts`, { params });
   return data;
 }
+
+export async function fetchPostById(id) {
+  const { data } = await axios.get(`${API_BASE_URL}/posts/${id}`);
+  return data;
+}
