@@ -14,7 +14,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 import { formatDate } from "@/lib/formatDate";
+
 import { fetchPostById } from "@/services/blogApi";
 
 const AUTHOR_AVATAR =
@@ -65,17 +67,20 @@ function ViewPostPage() {
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
+      toast.success("Copied!", {
+        description: "This article has been copied to your clipboard.",
+      });
     } catch (err) {
       console.error("Failed to copy link:", err);
     }
   };
 
   const handleShare = (platform) => {
-    const url = encodeURIComponent(window.location.href);
+    const link = encodeURIComponent(window.location.href);
     const shareUrls = {
-      facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
-      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
-      twitter: `https://twitter.com/intent/tweet?url=${url}`,
+      facebook: `https://www.facebook.com/share.php?u=${link}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${link}`,
+      twitter: `https://www.twitter.com/share?&url=${link}`,
     };
 
     window.open(shareUrls[platform], "_blank", "noopener,noreferrer");
