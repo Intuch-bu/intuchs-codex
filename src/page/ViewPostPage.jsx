@@ -15,6 +15,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 import { formatDate } from "@/lib/formatDate";
 
 import { fetchPostById } from "@/services/blogApi";
@@ -25,9 +26,8 @@ const AUTHOR_AVATAR =
 const AUTHOR_BIO =
   "I am a pet enthusiast and freelance writer who specializes in animal behavior and wellness. My goal is to inform and inspire others through my work.";
 
-const isLoggedIn = false;
-
 function ViewPostPage() {
+  const { isLoggedIn } = useAuth();
   const { id } = useParams();
   const [post, setPost] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
