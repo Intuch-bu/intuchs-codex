@@ -14,11 +14,12 @@ function ArticleSection() {
   const [totalPages, setTotalPages] = useState(1);
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefetching, setIsRefetching] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   useEffect(() => {
     const loadPosts = async () => {
-      setIsLoading(true);
+      setIsRefetching(true);
 
       try {
         const data = await fetchPosts({
@@ -36,6 +37,7 @@ function ArticleSection() {
         setTotalPages(1);
       } finally {
         setIsLoading(false);
+        setIsRefetching(false);
       }
     };
 
@@ -62,7 +64,9 @@ function ArticleSection() {
     }
   };
 
-  const showViewMore = !isLoading && posts.length > 0 && currentPage < totalPages;
+  const showInitialLoading = isLoading && posts.length === 0;
+  const showViewMore =
+    !showInitialLoading && !isRefetching && posts.length > 0 && currentPage < totalPages;
 
   return (
     <section id="latest-articles" className="w-full">
@@ -75,13 +79,17 @@ function ArticleSection() {
           onCategoryChange={setSelectedCategory}
         />
 
-        {isLoading ? (
+        {showInitialLoading ? (
           <p className="text-muted-foreground">Loading articles...</p>
         ) : posts.length === 0 ? (
           <p className="text-muted-foreground">No articles found.</p>
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div
+              className={`grid grid-cols-1 gap-4 transition-opacity md:grid-cols-2 ${
+                isRefetching ? "pointer-events-none opacity-60" : ""
+              }`}
+            >
               {posts.map((post) => (
                 <BlogCard
                   key={post.id}
