@@ -4,9 +4,9 @@ const CURRENT_USER_KEY = "blog_current_user";
 const defaultUsers = [
   {
     id: 1,
-    name: "Thompson P.",
-    username: "thompson",
-    email: "thompson@example.com",
+    name: "Intuch B.",
+    username: "intuch",
+    email: "intuch@example.com",
     password: "password123",
     profileImage: "",
   },
