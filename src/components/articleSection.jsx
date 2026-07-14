@@ -10,14 +10,15 @@ const POSTS_PER_PAGE = 6;
 
 function ArticleSection() {
   const [selectedCategory, setSelectedCategory] = useState("Highlight");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [posts, setPosts] = useState([]);
+  const [nextPage, setNextPage] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefetching, setIsRefetching] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   useEffect(() => {
+    let isCancelled = false;
+
     const loadPosts = async () => {
       setIsRefetching(true);
 
@@ -27,25 +28,34 @@ function ArticleSection() {
           page: 1,
           limit: POSTS_PER_PAGE,
         });
+
+        if (isCancelled) return;
+
         setPosts(data.posts ?? []);
-        setCurrentPage(1);
-        setTotalPages(data.totalPages ?? 1);
+        setNextPage(data.nextPage ?? null);
       } catch (error) {
         console.error("Failed to fetch posts:", error);
+        if (isCancelled) return;
         setPosts([]);
-        setCurrentPage(1);
-        setTotalPages(1);
+        setNextPage(null);
       } finally {
-        setIsLoading(false);
-        setIsRefetching(false);
+        if (!isCancelled) {
+          setIsLoading(false);
+          setIsRefetching(false);
+        }
       }
     };
 
     loadPosts();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [selectedCategory]);
 
   const handleViewMore = async () => {
-    const nextPage = currentPage + 1;
+    if (!nextPage || isLoadingMore) return;
+
     setIsLoadingMore(true);
 
     try {
@@ -55,8 +65,7 @@ function ArticleSection() {
         limit: POSTS_PER_PAGE,
       });
       setPosts((prevPosts) => [...prevPosts, ...(data.posts ?? [])]);
-      setCurrentPage(nextPage);
-      setTotalPages(data.totalPages ?? totalPages);
+      setNextPage(data.nextPage ?? null);
     } catch (error) {
       console.error("Failed to load more posts:", error);
     } finally {
@@ -66,7 +75,7 @@ function ArticleSection() {
 
   const showInitialLoading = isLoading && posts.length === 0;
   const showViewMore =
-    !showInitialLoading && !isRefetching && posts.length > 0 && currentPage < totalPages;
+    !showInitialLoading && !isRefetching && posts.length > 0 && nextPage != null;
 
   return (
     <section id="latest-articles" className="w-full">
