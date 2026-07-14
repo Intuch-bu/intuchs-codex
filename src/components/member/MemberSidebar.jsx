@@ -1,30 +1,30 @@
 import { NavLink } from "react-router-dom";
-import { KeyRound, UserRound } from "lucide-react";
+import { RefreshCw, UserRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
   { to: "/profile", label: "Profile", icon: UserRound },
-  { to: "/reset-password", label: "Reset password", icon: KeyRound },
+  { to: "/reset-password", label: "Reset password", icon: RefreshCw },
 ];
 
 function MemberSidebar() {
   return (
-    <aside className="w-full shrink-0 md:w-56">
-      <nav className="flex gap-2 md:flex-col">
+    <aside className="w-full">
+      <nav className="flex items-center gap-6 overflow-x-auto md:gap-8">
         {links.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors",
+                "flex shrink-0 items-center gap-2 py-1 text-base font-medium transition-colors",
                 isActive
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:bg-background/60 hover:text-foreground"
+                  ? "text-brown-600"
+                  : "text-brown-400 hover:text-brown-600"
               )
             }
           >
-            <Icon className="size-4" />
+            <Icon className="size-5" />
             {label}
           </NavLink>
         ))}

@@ -13,7 +13,8 @@ const defaultUsers = [
 ];
 
 function toSafeUser(user) {
-  const { password: _password, ...safeUser } = user;
+  const safeUser = { ...user };
+  delete safeUser.password;
   return safeUser;
 }
 
@@ -57,10 +58,6 @@ export function findUserByUsername(username) {
   );
 }
 
-export function findUserById(id) {
-  return getUsers().find((user) => user.id === id);
-}
-
 export function loginUser(email, password) {
   const user = findUserByEmail(email);
 
@@ -88,19 +85,14 @@ export function updateUserProfile(userId, updates) {
     return { ok: false, error: "User not found" };
   }
 
-  if (
-    updates.email &&
-    findUserByEmail(updates.email) &&
-    findUserByEmail(updates.email).id !== userId
-  ) {
+  const userWithSameEmail = updates.email && findUserByEmail(updates.email);
+  if (userWithSameEmail && userWithSameEmail.id !== userId) {
     return { ok: false, error: "Email is already taken", field: "email" };
   }
 
-  if (
-    updates.username &&
-    findUserByUsername(updates.username) &&
-    findUserByUsername(updates.username).id !== userId
-  ) {
+  const userWithSameUsername =
+    updates.username && findUserByUsername(updates.username);
+  if (userWithSameUsername && userWithSameUsername.id !== userId) {
     return { ok: false, error: "Username is already taken", field: "username" };
   }
 

@@ -1,95 +1,66 @@
 # Intuch's Codex
 
-A personal blog where I share development notes, competitive Warhammer 40,000 strategy, and lessons learned along the way. This project also serves as a portfolio piece for my resume — built to showcase front-end skills with a clean, modern UI.
+บล็อกส่วนตัวสำหรับบันทึกการเรียนรู้การพัฒนาเว็บและบทความต่าง ๆ โปรเจกต์นี้สร้างขึ้นเพื่อฝึก React ดังนั้นโค้ดตั้งใจให้เรียบง่าย อ่านตามได้ง่าย และเหมาะกับผู้เริ่มต้น
 
-> _"Seek Knowledge, Question Everything."_
+## สิ่งที่มีในโปรเจกต์
 
-## About
+- หน้ารวมบทความ พร้อมเลือกหมวดหมู่ ค้นหา และโหลดเพิ่ม
+- หน้าอ่านบทความแบบ Markdown
+- ระบบสมัครสมาชิก, login, profile และ reset password แบบ mock ด้วย `localStorage`
+- Responsive navigation สำหรับ desktop และ mobile
 
-**Intuch's Codex** is a personal blog and writing space built by **Intuch Bunluesup** — an aspiring developer and competitive Warhammer 40k player. The goal is to document my journey: building projects, learning continuously, and writing articles about what I discover.
+## เทคโนโลยี
 
-## Features
+- React 19
+- Vite
+- React Router
+- Tailwind CSS
+- shadcn UI components
+- Axios สำหรับเรียก Blog API
 
-- Responsive landing page (hero, article section, footer)
-- Article browsing with category filters (Highlight, Development, Inspiration, Warhammer40k)
-- Search bar for finding articles
-- Light/dark theme support via CSS variables
-- Accessible UI components built on Radix UI / shadcn
+## เริ่มต้นใช้งาน
 
-## Tech Stack
-
-- **Framework:** [React 19](https://react.dev/)
-- **Build Tool:** [Vite](https://vite.dev/)
-- **Styling:** [Tailwind CSS v4](https://tailwindcss.com/)
-- **UI Components:** [shadcn](https://ui.shadcn.com/) + [Radix UI](https://www.radix-ui.com/)
-- **Icons:** [lucide-react](https://lucide.dev/)
-- **Fonts:** Inter & Geist (Fontsource)
-- **Linting:** ESLint
-
-## Getting Started
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) (v18 or newer recommended)
-- npm
-
-### Installation
+ต้องมี Node.js 18 ขึ้นไปและ npm
 
 ```bash
-# Clone the repository
-git clone https://github.com/<your-username>/intuchs-codex.git
-cd intuchs-codex
-
-# Install dependencies
 npm install
-```
-
-### Development
-
-```bash
 npm run dev
 ```
 
-Open the local URL shown in the terminal (usually `http://localhost:5173`).
+เปิด URL ที่ Vite แสดงใน terminal (ปกติคือ `http://localhost:5173`)
 
-### Available Scripts
+## คำสั่งที่ใช้บ่อย
 
-| Command           | Description                              |
-| ----------------- | ---------------------------------------- |
-| `npm run dev`     | Start the development server with HMR    |
-| `npm run build`   | Build the app for production             |
-| `npm run preview` | Preview the production build locally     |
-| `npm run lint`    | Run ESLint                               |
-
-## Project Structure
-
-```
-intuchs-codex/
-├── public/
-├── src/
-│   ├── assets/             # Images (hero, etc.)
-│   ├── components/
-│   │   ├── ui/             # Reusable UI components (button, input, select)
-│   │   ├── navbar.jsx
-│   │   ├── heroSection.jsx
-│   │   ├── articleSection.jsx
-│   │   └── footer.jsx
-│   ├── App.jsx             # Root component
-│   ├── index.css           # Theme variables & global styles
-│   └── main.jsx            # App entry point
-├── index.html
-├── package.json
-└── vite.config.js
+```bash
+npm run dev
+npm run lint
+npm run build
+npm run preview
 ```
 
-## Contact
+## โครงสร้างโปรเจกต์
 
-Get in touch:
+```text
+src/
+├── api/                  # ฟังก์ชันเรียก Blog API
+├── assets/               # รูปภาพที่ใช้ในหน้าเว็บ เช่น hero.jpg
+├── components/           # React components แยกตามหน้าที่
+│   ├── blog/             # ส่วนของหน้า list และรายละเอียดบทความ
+│   ├── layout/           # Navbar และ Footer
+│   ├── member/           # Sidebar และ layout ของ member pages
+│   └── ui/               # shadcn UI components (ไม่แก้ถ้าไม่จำเป็น)
+├── constants/            # ข้อมูลคงที่ เช่น category และ author fallback
+├── context/              # React Context สำหรับ auth
+├── lib/                  # ฟังก์ชันช่วยเหลือและ mock auth
+├── pages/                # Component ของแต่ละ route
+├── App.jsx               # กำหนด routes
+└── main.jsx              # จุดเริ่มต้นของแอป
+```
 
-- LinkedIn
-- GitHub
-- Email
+## ข้อมูลสำคัญสำหรับผู้เรียน
 
----
-
-Built with React + Vite by Intuch Bunluesup.
+- บทความมาจาก external API ใน `src/api/blogApi.js`
+- auth เป็นเพียง mock เพื่อการเรียนรู้ ข้อมูลอยู่ใน browser `localStorage` ไม่ใช่ระบบสำหรับ production
+- รักษาไฟล์ `src/assets/hero.jpg` ไว้ เพราะ `HeroSection` ใช้แสดงภาพ hero
+- อ่านกติกาการแก้โค้ดสำหรับ AI ได้ที่ [AGENT.md](AGENT.md)
+- รายละเอียดการ refactor ล่าสุดอยู่ที่ [docs/refactor-report.md](docs/refactor-report.md)

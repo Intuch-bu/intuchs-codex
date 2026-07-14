@@ -1,13 +1,13 @@
-import { createContext, useContext, useState } from "react";
+import { useState } from "react";
 import {
   getCurrentUser,
   loginUser as login,
   logoutUser,
+  registerUser as register,
   resetUserPassword,
   updateUserProfile,
-} from "@/lib/authStorage";
-
-const AuthContext = createContext(null);
+} from "@/lib/mockAuth";
+import { AuthContext } from "@/context/AuthContextValue";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => getCurrentUser());
@@ -25,6 +25,10 @@ export function AuthProvider({ children }) {
   const logout = () => {
     logoutUser();
     setUser(null);
+  };
+
+  const registerUser = (newUser) => {
+    return register(newUser);
   };
 
   const updateProfile = (updates) => {
@@ -62,6 +66,7 @@ export function AuthProvider({ children }) {
         isLoggedIn: !!user,
         loginUser,
         logout,
+        registerUser,
         updateProfile,
         resetPassword,
       }}
@@ -71,12 +76,3 @@ export function AuthProvider({ children }) {
   );
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-
-  if (!context) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
-
-  return context;
-}

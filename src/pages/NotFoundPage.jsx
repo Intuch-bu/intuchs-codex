@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { CircleAlert } from "lucide-react";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 
 function NotFoundPage() {

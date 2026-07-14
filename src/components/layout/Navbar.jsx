@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Bell, Menu, Search, UserRound } from "lucide-react";
+import { Bell, ChevronDown, Menu, Search, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,25 +8,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAuth } from "@/context/AuthContext";
-
-const notifications = [
-  {
-    id: 1,
-    title: "Thompson P.",
-    message: "Published a new article",
-    time: "2 hours ago",
-    avatar:
-      "https://res.cloudinary.com/dcbpjtd1r/image/upload/v1728449784/my-blog-post/xgfy0xnvyemkklcqodkg.jpg",
-  },
-  {
-    id: 2,
-    title: "Jacob Josh",
-    message: "Commented on the article 'Will the deep dark forest...'",
-    time: "4 hours ago",
-    avatar: "",
-  },
-];
+import SiteLogo from "@/components/layout/SiteLogo";
+import { useAuth } from "@/context/useAuth";
+import { NOTIFICATIONS } from "@/constants/site";
 
 function UserAvatar({ user, className = "size-8" }) {
   if (user?.profileImage) {
@@ -58,12 +42,10 @@ function Navbar() {
   };
 
   return (
-    <nav className="w-full border-b border-gray-200 bg-background">
-      <div className="mx-auto max-w-[1366px] px-10 py-4">
+    <nav className="w-full border-b border-border bg-background">
+      <div className="mx-auto max-w-[1366px] px-6 py-4 md:px-10">
         <div className="flex items-center justify-between">
-          <Link to="/" className="text-2xl font-bold">
-            Intuch<span className="text-teal-500">'</span>s Codex
-          </Link>
+          <SiteLogo />
 
           {isLoggedIn ? (
             <div className="hidden items-center gap-3 md:flex">
@@ -88,7 +70,7 @@ function Navbar() {
                 <DropdownMenuContent align="end" className="w-80 p-2">
                   <p className="px-2 py-1.5 text-sm font-semibold">Notifications</p>
                   <DropdownMenuSeparator />
-                  {notifications.map((item) => (
+                  {NOTIFICATIONS.map((item) => (
                     <div
                       key={item.id}
                       className="flex gap-3 rounded-xl px-2 py-3 hover:bg-muted"
@@ -120,6 +102,7 @@ function Navbar() {
                 <DropdownMenuTrigger className="inline-flex cursor-pointer items-center gap-2 rounded-full px-2 py-1 hover:bg-muted">
                   <UserAvatar user={user} />
                   <span className="text-sm font-medium">{user.name}</span>
+                  <ChevronDown className="size-4 text-muted-foreground" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem onClick={() => navigate("/profile")}>
@@ -134,11 +117,18 @@ function Navbar() {
               </DropdownMenu>
             </div>
           ) : (
-            <div className="hidden gap-4 md:flex">
-              <Button asChild variant="outline">
+            <div className="hidden gap-2 md:flex">
+              <Button
+                asChild
+                variant="outline"
+                className="h-12 rounded-full border-brown-400 bg-white px-10 text-base font-medium text-brown-600 hover:bg-muted"
+              >
                 <Link to="/login">Log in</Link>
               </Button>
-              <Button asChild variant="default">
+              <Button
+                asChild
+                className="h-12 rounded-full bg-brown-600 px-10 text-base font-medium text-white hover:bg-brown-600/90"
+              >
                 <Link to="/signup">Sign up</Link>
               </Button>
             </div>
@@ -158,7 +148,7 @@ function Navbar() {
               alignOffset={40}
               className="box-border w-screen min-w-0 rounded-none border bg-white p-0 shadow-sm ring-0 md:hidden"
             >
-              <div className="mx-auto flex w-full max-w-[1366px] flex-col gap-3 px-10 py-4">
+              <div className="mx-auto flex w-full max-w-[1366px] flex-col gap-3 px-6 py-4">
                 {isLoggedIn ? (
                   <>
                     <div className="flex items-center gap-3 pb-2">
@@ -173,7 +163,6 @@ function Navbar() {
                     </Button>
                     <Button
                       type="button"
-                      variant="default"
                       className="h-12 w-full rounded-full"
                       onClick={handleLogout}
                     >
@@ -185,7 +174,7 @@ function Navbar() {
                     <Button asChild variant="outline" className="h-12 w-full rounded-full">
                       <Link to="/login">Log in</Link>
                     </Button>
-                    <Button asChild variant="default" className="h-12 w-full rounded-full">
+                    <Button asChild className="h-12 w-full rounded-full">
                       <Link to="/signup">Sign up</Link>
                     </Button>
                   </>

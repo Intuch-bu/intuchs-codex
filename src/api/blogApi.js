@@ -1,11 +1,12 @@
 import axios from "axios";
+import { DEFAULT_CATEGORY } from "@/constants/blog";
 
 const API_BASE_URL = "https://blog-post-project-api.vercel.app";
 
 export async function fetchPosts({ page = 1, limit = 6, category, keyword } = {}) {
   const params = { page, limit };
 
-  if (category && category !== "Highlight") {
+  if (category && category !== DEFAULT_CATEGORY) {
     params.category = category;
   }
 

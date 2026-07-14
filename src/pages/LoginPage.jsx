@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Navbar from "@/components/navbar";
+import Navbar from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/useAuth";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -32,45 +32,54 @@ function LoginPage() {
   return (
     <>
       <Navbar />
-      <main className="flex min-h-[calc(100vh-73px)] items-center justify-center bg-muted px-4 py-10">
-        <div className="w-full max-w-[440px] rounded-2xl bg-background p-8 shadow-sm">
-          <h1 className="mb-8 text-center text-2xl font-bold">Log in</h1>
+      <main className="flex min-h-[calc(100vh-78px)] items-center justify-center bg-background px-4 py-8 sm:py-10">
+        <div className="w-full max-w-[343px] rounded-[16px] bg-muted px-4 py-8 sm:max-w-[440px] sm:px-10 sm:py-10">
+          <h1 className="mb-8 text-center text-[40px] font-semibold leading-[48px] text-brown-600">
+            Log in
+          </h1>
 
-          <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
-            <div className="flex flex-col gap-2">
-              <label htmlFor="email" className="text-sm font-medium">
+          <form className="mx-auto flex w-full max-w-[320px] flex-col gap-6" onSubmit={handleSubmit}>
+            <div className="flex flex-col gap-1">
+              <label htmlFor="email" className="text-base font-medium text-brown-400">
                 Email
               </label>
               <Input
                 id="email"
                 type="email"
+                placeholder="Email"
                 value={form.email}
                 onChange={handleChange("email")}
-                className={`h-11 rounded-lg border-border bg-background ${showError ? "border-destructive" : ""}`}
+                className={`h-12 rounded-lg border-border bg-white placeholder:text-brown-400 ${showError ? "border-destructive" : ""}`}
               />
             </div>
 
-            <div className="flex flex-col gap-2">
-              <label htmlFor="password" className="text-sm font-medium">
+            <div className="flex flex-col gap-1">
+              <label htmlFor="password" className="text-base font-medium text-brown-400">
                 Password
               </label>
               <Input
                 id="password"
                 type="password"
+                placeholder="Password"
                 value={form.password}
                 onChange={handleChange("password")}
-                className={`h-11 rounded-lg border-border bg-background ${showError ? "border-destructive" : ""}`}
+                className={`h-12 rounded-lg border-border bg-white placeholder:text-brown-400 ${showError ? "border-destructive" : ""}`}
               />
             </div>
 
-            <Button type="submit" className="mt-2 h-12 w-full rounded-full">
-              Log in
-            </Button>
+            <div className="flex justify-center pt-2">
+              <Button
+                type="submit"
+                className="h-12 rounded-full bg-brown-600 px-10 text-base font-medium text-white hover:bg-brown-600/90"
+              >
+                Log in
+              </Button>
+            </div>
           </form>
 
-          <p className="mt-6 text-center text-sm text-muted-foreground">
+          <p className="mt-6 text-center text-base font-medium text-brown-500">
             Don&apos;t have any account?{" "}
-            <Link to="/signup" className="font-medium text-foreground underline-offset-4 hover:underline">
+            <Link to="/signup" className="font-medium text-brown-600 underline underline-offset-4">
               Sign up
             </Link>
           </p>
