@@ -8,8 +8,19 @@ const defaultUsers = [
     username: "thompson",
     email: "thompson@example.com",
     password: "password123",
+    profileImage: "",
   },
 ];
+
+function toSafeUser(user) {
+  const { password: _password, ...safeUser } = user;
+  return safeUser;
+}
+
+function setCurrentUser(user) {
+  localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(toSafeUser(user)));
+  return toSafeUser(user);
+}
 
 export function getUsers() {
   const stored = localStorage.getItem(USERS_KEY);
@@ -28,10 +39,10 @@ export function saveUsers(users) {
 
 export function registerUser(user) {
   const users = getUsers();
-  const newUser = { ...user, id: Date.now() };
+  const newUser = { ...user, id: Date.now(), profileImage: user.profileImage ?? "" };
   users.push(newUser);
   saveUsers(users);
-  return newUser;
+  return toSafeUser(newUser);
 }
 
 export function findUserByEmail(email) {
@@ -46,6 +57,10 @@ export function findUserByUsername(username) {
   );
 }
 
+export function findUserById(id) {
+  return getUsers().find((user) => user.id === id);
+}
+
 export function loginUser(email, password) {
   const user = findUserByEmail(email);
 
@@ -53,9 +68,7 @@ export function loginUser(email, password) {
     return null;
   }
 
-  const { password: _password, ...safeUser } = user;
-  localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(safeUser));
-  return safeUser;
+  return setCurrentUser(user);
 }
 
 export function getCurrentUser() {
@@ -65,6 +78,52 @@ export function getCurrentUser() {
 
 export function logoutUser() {
   localStorage.removeItem(CURRENT_USER_KEY);
+}
+
+export function updateUserProfile(userId, updates) {
+  const users = getUsers();
+  const index = users.findIndex((user) => user.id === userId);
+
+  if (index === -1) {
+    return { ok: false, error: "User not found" };
+  }
+
+  if (
+    updates.email &&
+    findUserByEmail(updates.email) &&
+    findUserByEmail(updates.email).id !== userId
+  ) {
+    return { ok: false, error: "Email is already taken", field: "email" };
+  }
+
+  if (
+    updates.username &&
+    findUserByUsername(updates.username) &&
+    findUserByUsername(updates.username).id !== userId
+  ) {
+    return { ok: false, error: "Username is already taken", field: "username" };
+  }
+
+  users[index] = { ...users[index], ...updates };
+  saveUsers(users);
+  return { ok: true, user: setCurrentUser(users[index]) };
+}
+
+export function resetUserPassword(userId, currentPassword, newPassword) {
+  const users = getUsers();
+  const index = users.findIndex((user) => user.id === userId);
+
+  if (index === -1) {
+    return { ok: false, error: "User not found" };
+  }
+
+  if (users[index].password !== currentPassword) {
+    return { ok: false, error: "Current password is incorrect", field: "currentPassword" };
+  }
+
+  users[index] = { ...users[index], password: newPassword };
+  saveUsers(users);
+  return { ok: true, user: setCurrentUser(users[index]) };
 }
 
 export function isValidEmail(email) {

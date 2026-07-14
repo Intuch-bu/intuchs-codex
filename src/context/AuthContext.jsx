@@ -3,6 +3,8 @@ import {
   getCurrentUser,
   loginUser as login,
   logoutUser,
+  resetUserPassword,
+  updateUserProfile,
 } from "@/lib/authStorage";
 
 const AuthContext = createContext(null);
@@ -25,6 +27,34 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const updateProfile = (updates) => {
+    if (!user) {
+      return { ok: false, error: "Not logged in" };
+    }
+
+    const result = updateUserProfile(user.id, updates);
+
+    if (result.ok) {
+      setUser(result.user);
+    }
+
+    return result;
+  };
+
+  const resetPassword = (currentPassword, newPassword) => {
+    if (!user) {
+      return { ok: false, error: "Not logged in" };
+    }
+
+    const result = resetUserPassword(user.id, currentPassword, newPassword);
+
+    if (result.ok) {
+      setUser(result.user);
+    }
+
+    return result;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -32,6 +62,8 @@ export function AuthProvider({ children }) {
         isLoggedIn: !!user,
         loginUser,
         logout,
+        updateProfile,
+        resetPassword,
       }}
     >
       {children}

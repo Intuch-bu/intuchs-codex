@@ -34,7 +34,7 @@ function ArticleSection() {
   const showInitialLoading = isLoading && posts.length === 0;
 
   return (
-    <section className="w-full">
+    <section id="latest-articles" className="w-full">
       <div className="mx-auto max-w-[1366px] px-10 py-8 flex flex-col gap-6">
         <h2 className="text-2xl font-bold">Latest articles</h2>
 
