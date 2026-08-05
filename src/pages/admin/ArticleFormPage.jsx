@@ -27,16 +27,18 @@ function ArticleFormPage() {
 
   const [errors, setErrors] = useState({});
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     if (isEditMode && id) {
-      const existing = articles.find((item) => item.id === id);
+      const existing = articles.find((item) => String(item.id) === String(id));
       if (existing) {
         setForm({
           title: existing.title || "",
           category: existing.category || categories[0] || "General",
           description: existing.description || "",
           content: existing.content || "",
-          thumbnail: existing.thumbnail || "",
+          thumbnail: existing.thumbnail || existing.image || "",
         });
       } else {
         toast.error("Article not found");
@@ -88,28 +90,36 @@ function ArticleFormPage() {
     return Object.keys(nextErrors).length === 0;
   };
 
-  const handleSave = (status) => {
-    if (!validate()) return;
+  const handleSave = async (status) => {
+    if (!validate() || isSubmitting) return;
 
-    if (isEditMode && id) {
-      updateArticle(id, { ...form, status });
-      toast.success(
-        status === "published" ? "Article published successfully" : "Draft saved successfully",
-        {
-          description: `Article "${form.title}" has been updated.`,
-        }
-      );
-    } else {
-      addArticle({ ...form, status });
-      toast.success(
-        status === "published" ? "Article published successfully" : "Draft created successfully",
-        {
-          description: `Article "${form.title}" has been created as ${status}.`,
-        }
-      );
+    setIsSubmitting(true);
+
+    try {
+      if (isEditMode && id) {
+        await updateArticle(id, { ...form, status });
+        toast.success(
+          status === "published" ? "Article published successfully" : "Draft saved successfully",
+          {
+            description: `Article "${form.title}" has been updated.`,
+          }
+        );
+      } else {
+        await addArticle({ ...form, status });
+        toast.success(
+          status === "published" ? "Article published successfully" : "Draft created successfully",
+          {
+            description: `Article "${form.title}" has been created as ${status}.`,
+          }
+        );
+      }
+      navigate("/admin/articles");
+    } catch (err) {
+      console.error("Failed to save article:", err);
+      toast.error("Failed to save article. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    navigate("/admin/articles");
   };
 
   return (
@@ -247,23 +257,30 @@ function ArticleFormPage() {
           <Button
             type="button"
             variant="outline"
+            disabled={isSubmitting}
             className="h-11 rounded-full border-border px-6 text-sm font-medium text-brown-600"
             onClick={() => handleSave("draft")}
           >
-            Save as draft
+            {isSubmitting ? "Saving..." : "Save as draft"}
           </Button>
 
           <Button
             type="button"
+            disabled={isSubmitting}
             className="h-11 rounded-full bg-brown-600 px-8 text-sm font-medium text-white hover:bg-brown-600/90"
             onClick={() => handleSave("published")}
           >
-            {isEditMode ? "Save changes" : "Save and publish"}
+            {isSubmitting
+              ? "Saving..."
+              : isEditMode
+              ? "Save changes"
+              : "Save and publish"}
           </Button>
 
           <Button
             type="button"
             variant="ghost"
+            disabled={isSubmitting}
             className="h-11 rounded-full px-6 text-sm font-medium text-muted-foreground"
             onClick={() => navigate("/admin/articles")}
           >

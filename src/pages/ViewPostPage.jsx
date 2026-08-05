@@ -28,8 +28,9 @@ function ViewPostPage() {
       setError(null);
 
       try {
-        const data = await fetchPostById(id);
-        setPost(data);
+        const response = await fetchPostById(id);
+        const postData = response.data || response;
+        setPost(postData);
       } catch (err) {
         console.error("Failed to fetch post:", err);
         setError("Post not found.");

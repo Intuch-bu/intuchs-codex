@@ -19,7 +19,7 @@ import { useAdmin } from "@/context/useAdmin";
 
 function ArticleManagementPage() {
   const { isLoggedIn } = useAuth();
-  const { articles, categories, deleteArticle } = useAdmin();
+  const { articles, categories, deleteArticle, isLoading } = useAdmin();
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -47,13 +47,14 @@ function ArticleManagementPage() {
     });
   }, [articles, searchTerm, statusFilter, categoryFilter]);
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (!articleToDelete) return;
-    deleteArticle(articleToDelete.id);
-    toast.success("Article deleted", {
-      description: `"${articleToDelete.title}" has been deleted.`,
-    });
+    const target = articleToDelete;
     setArticleToDelete(null);
+    await deleteArticle(target.id);
+    toast.success("Article deleted", {
+      description: `"${target.title}" has been deleted.`,
+    });
   };
 
   const actionButton = (
@@ -137,7 +138,13 @@ function ArticleManagementPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filteredArticles.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
+                    Loading articles...
+                  </td>
+                </tr>
+              ) : filteredArticles.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
                     No articles found.
