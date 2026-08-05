@@ -1,31 +1,34 @@
 import { NavLink } from "react-router-dom";
-import { RefreshCw, UserRound } from "lucide-react";
+import { Bell, FileText, FolderTree, RefreshCw, UserRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
+  { to: "/admin/articles", label: "Article management", icon: FileText },
+  { to: "/admin/categories", label: "Category management", icon: FolderTree },
   { to: "/profile", label: "Profile", icon: UserRound },
+  { to: "/admin/notifications", label: "Notification", icon: Bell },
   { to: "/reset-password", label: "Reset password", icon: RefreshCw },
 ];
 
 function MemberSidebar() {
   return (
     <aside className="w-full">
-      <nav className="flex items-center gap-6 overflow-x-auto md:gap-8">
+      <nav className="flex items-center gap-4 overflow-x-auto border-b border-border pb-4 md:flex-col md:items-start md:gap-3 md:border-b-0 md:pb-0">
         {links.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
             className={({ isActive }) =>
               cn(
-                "flex shrink-0 items-center gap-2 py-1 text-base font-medium transition-colors",
+                "flex shrink-0 items-center gap-3 rounded-xl px-4 py-2.5 text-base font-medium transition-colors w-full",
                 isActive
-                  ? "text-brown-600"
-                  : "text-brown-400 hover:text-brown-600"
+                  ? "bg-brown-100 text-brown-600 font-semibold"
+                  : "text-brown-400 hover:bg-muted hover:text-brown-600"
               )
             }
           >
-            <Icon className="size-5" />
-            {label}
+            <Icon className="size-5 shrink-0" />
+            <span>{label}</span>
           </NavLink>
         ))}
       </nav>
