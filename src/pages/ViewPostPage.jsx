@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/context/useAuth";
 import { formatDate } from "@/lib/formatDate";
 import { MOCK_COMMENTS } from "@/constants/site";
-import { fetchPostById } from "@/api/blogApi";
+import { fetchPostById, DEFAULT_POST_IMAGE } from "@/api/blogApi";
 
 function ViewPostPage() {
   const { isLoggedIn } = useAuth();
@@ -87,7 +87,10 @@ function ViewPostPage() {
           <article className="flex flex-col gap-8 md:gap-10">
             <img
               className="h-[212px] w-full rounded-2xl object-cover sm:h-[400px] lg:h-[587px]"
-              src={post.image}
+              src={post.image || DEFAULT_POST_IMAGE}
+              onError={(e) => {
+                e.currentTarget.src = DEFAULT_POST_IMAGE;
+              }}
               alt={post.title}
             />
 
@@ -120,7 +123,7 @@ function ViewPostPage() {
                 </div>
 
                 <PostActions
-                  likes={post.likes}
+                  likes={post.likes ?? post.likes_count ?? 0}
                   onRequireAuth={requireAuth}
                   onCopyLink={handleCopyLink}
                   onShare={handleShare}
