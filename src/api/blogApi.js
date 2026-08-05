@@ -12,6 +12,12 @@ export const DEFAULT_POST_IMAGE =
  */
 export function transformApiPostToArticle(post) {
   if (!post) return null;
+  const authorName = post.author
+    ? typeof post.author === "object"
+      ? post.author.name || "Thompson P."
+      : post.author
+    : "Thompson P.";
+
   return {
     id: post.id,
     title: post.title || "",
@@ -26,9 +32,7 @@ export function transformApiPostToArticle(post) {
     createdAt: post.date || new Date().toISOString(),
     date: post.date || new Date().toISOString(),
     likes_count: post.likes_count || 0,
-    author: {
-      name: "Thompson P.",
-    },
+    author: authorName,
   };
 }
 

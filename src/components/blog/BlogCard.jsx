@@ -1,20 +1,33 @@
 import { Link } from "react-router-dom";
 import { DEFAULT_AUTHOR_AVATAR } from "@/constants/site";
+import { DEFAULT_POST_IMAGE } from "@/api/blogApi";
 
 function BlogCard({ id, image, category, title, description, author, date }) {
+  const authorName =
+    typeof author === "object" ? author?.name || "Thompson P." : author || "Thompson P.";
+  const categoryName =
+    typeof category === "object" ? category?.name || "General" : category || "General";
+
   return (
     <div className="flex flex-col gap-6">
       <Link
         to={`/post/${id}`}
         className="relative h-[212px] overflow-hidden rounded-2xl md:h-[360px]"
       >
-        <img className="size-full object-cover" src={image} alt={title} />
+        <img
+          className="size-full object-cover"
+          src={image || DEFAULT_POST_IMAGE}
+          onError={(e) => {
+            e.currentTarget.src = DEFAULT_POST_IMAGE;
+          }}
+          alt={title}
+        />
       </Link>
 
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
           <span className="w-fit rounded-full bg-brand-soft px-3 py-1 text-sm font-medium text-brand">
-            {category}
+            {categoryName}
           </span>
           <div className="flex flex-col gap-2">
             <Link to={`/post/${id}`}>
@@ -33,9 +46,9 @@ function BlogCard({ id, image, category, title, description, author, date }) {
             <img
               className="size-6 rounded-full object-cover"
               src={DEFAULT_AUTHOR_AVATAR}
-              alt={author}
+              alt={authorName}
             />
-            <span className="text-brown-500">{author}</span>
+            <span className="text-brown-500">{authorName}</span>
           </div>
           <span className="h-[18px] w-px bg-border" />
           <span className="text-brown-400">{date}</span>
