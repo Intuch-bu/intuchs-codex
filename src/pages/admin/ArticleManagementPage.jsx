@@ -37,8 +37,11 @@ function ArticleManagementPage() {
         art.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (art.description && art.description.toLowerCase().includes(searchTerm.toLowerCase()));
 
+      const isPub = art.status === "published" || Number(art.status_id) === 1;
       const matchesStatus =
-        statusFilter === "all" || art.status.toLowerCase() === statusFilter.toLowerCase();
+        statusFilter === "all" ||
+        (statusFilter === "published" && isPub) ||
+        (statusFilter === "draft" && !isPub);
 
       const matchesCategory =
         categoryFilter === "all" || art.category === categoryFilter;
@@ -152,8 +155,9 @@ function ArticleManagementPage() {
                 </tr>
               ) : (
                 filteredArticles.map((art) => {
-                  const isPublished = art.status === "published";
-                  const dateFormatted = new Date(art.createdAt).toLocaleDateString("en-US", {
+                  const isPublished = art.status === "published" || Number(art.status_id) === 1;
+                  const itemImage = art.image || art.thumbnail;
+                  const dateFormatted = new Date(art.date || art.createdAt || Date.now()).toLocaleDateString("en-US", {
                     month: "short",
                     day: "numeric",
                     year: "numeric",
@@ -163,9 +167,9 @@ function ArticleManagementPage() {
                     <tr key={art.id} className="hover:bg-muted/30 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          {art.thumbnail ? (
+                          {itemImage ? (
                             <img
-                              src={art.thumbnail}
+                              src={itemImage}
                               alt=""
                               className="size-10 rounded-md object-cover shrink-0"
                             />
