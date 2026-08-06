@@ -4,14 +4,13 @@ import BlogCard from "@/components/blog/BlogCard";
 import { formatDate } from "@/lib/formatDate";
 import { fetchPosts, fetchCategories } from "@/api/blogApi";
 import {
-  BLOG_CATEGORIES,
   DEFAULT_CATEGORY,
   POSTS_PER_PAGE,
 } from "@/constants/blog";
 
 function ArticleSection() {
   const [selectedCategory, setSelectedCategory] = useState(DEFAULT_CATEGORY);
-  const [categories, setCategories] = useState(BLOG_CATEGORIES);
+  const [categories, setCategories] = useState([DEFAULT_CATEGORY]);
   const [posts, setPosts] = useState([]);
   const [nextPage, setNextPage] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
