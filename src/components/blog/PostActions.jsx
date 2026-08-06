@@ -1,16 +1,27 @@
 import { Hand, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-function PostActions({ likes, onRequireAuth, onCopyLink, onShare }) {
+function PostActions({ likesCount = 0, isLiked = false, onToggleLike, onRequireAuth, onCopyLink, onShare }) {
+  const handleLikeClick = () => {
+    if (!onRequireAuth()) return;
+    if (onToggleLike) {
+      onToggleLike();
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4 rounded-2xl bg-muted px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
       <button
         type="button"
-        onClick={onRequireAuth}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-border bg-white px-5 py-2.5 text-base font-medium text-brown-600 sm:w-fit"
+        onClick={handleLikeClick}
+        className={`inline-flex w-full items-center justify-center gap-2 rounded-full border px-5 py-2.5 text-base font-medium transition-colors sm:w-fit ${
+          isLiked
+            ? "border-brown-600 bg-brown-600 text-white hover:bg-brown-600/90"
+            : "border-border bg-white text-brown-600 hover:bg-background"
+        }`}
       >
-        <Hand className="size-5" />
-        {likes}
+        <Hand className={`size-5 ${isLiked ? "fill-white" : ""}`} />
+        {likesCount}
       </button>
 
       <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">

@@ -114,3 +114,41 @@ export async function updateUserProfile(profileData) {
   const { data } = await axios.put(`${API_BASE_URL}/users/profile`, profileData, { headers });
   return data;
 }
+
+// ─── Comments endpoints ───
+
+export async function fetchComments(postId) {
+  const { data } = await axios.get(`${API_BASE_URL}/posts/${postId}/comments`);
+  return data;
+}
+
+export async function addComment(postId, comment_text) {
+  const headers = await getAuthHeaders();
+  const { data } = await axios.post(
+    `${API_BASE_URL}/posts/${postId}/comments`,
+    { comment_text },
+    { headers }
+  );
+  return data;
+}
+
+// ─── Likes endpoints ───
+
+export async function fetchLikeStatus(postId) {
+  const headers = await getAuthHeaders();
+  const { data } = await axios.get(`${API_BASE_URL}/posts/${postId}/like-status`, { headers });
+  return data;
+}
+
+export async function toggleLike(postId) {
+  const headers = await getAuthHeaders();
+  const { data } = await axios.post(`${API_BASE_URL}/posts/${postId}/like`, {}, { headers });
+  return data;
+}
+
+// ─── Notifications endpoint ───
+
+export async function fetchNotifications() {
+  const { data } = await axios.get(`${API_BASE_URL}/notifications`);
+  return data;
+}

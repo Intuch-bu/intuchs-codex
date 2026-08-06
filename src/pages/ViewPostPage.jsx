@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { UserRound } from "lucide-react";
@@ -11,16 +11,45 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAuth } from "@/context/useAuth";
 import { formatDate } from "@/lib/formatDate";
-import { MOCK_COMMENTS } from "@/constants/site";
-import { fetchPostById } from "@/api/blogApi";
+import {
+  fetchPostById,
+  fetchComments,
+  addComment,
+  fetchLikeStatus,
+  toggleLike,
+} from "@/api/blogApi";
 
 function ViewPostPage() {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user } = useAuth();
   const { id } = useParams();
   const [post, setPost] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [commentInput, setCommentInput] = useState("");
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
+
+  const loadComments = useCallback(async () => {
+    try {
+      const res = await fetchComments(id);
+      setComments(res.data || []);
+    } catch (err) {
+      console.error("Failed to fetch comments:", err);
+    }
+  }, [id]);
+
+  const loadLikeStatus = useCallback(async () => {
+    try {
+      const res = await fetchLikeStatus(id);
+      setLikesCount(res.likes_count ?? 0);
+      setIsLiked(!!res.isLiked);
+    } catch (err) {
+      console.error("Failed to fetch like status:", err);
+    }
+  }, [id]);
 
   useEffect(() => {
     const loadPost = async () => {
@@ -31,6 +60,9 @@ function ViewPostPage() {
         const response = await fetchPostById(id);
         const postData = response.data || response;
         setPost(postData);
+        setLikesCount(postData.likes_count ?? postData.likes ?? 0);
+
+        await Promise.all([loadComments(), loadLikeStatus()]);
       } catch (err) {
         console.error("Failed to fetch post:", err);
         setError("Post not found.");
@@ -41,7 +73,7 @@ function ViewPostPage() {
     };
 
     loadPost();
-  }, [id]);
+  }, [id, loadComments, loadLikeStatus]);
 
   const content = (post?.content ?? "").replace(/\\n/g, "\n");
 
@@ -53,11 +85,42 @@ function ViewPostPage() {
     return true;
   };
 
+  const handleToggleLike = async () => {
+    if (!requireAuth()) return;
+    try {
+      const res = await toggleLike(id);
+      setLikesCount(res.likes_count ?? 0);
+      setIsLiked(!!res.isLiked);
+    } catch (err) {
+      console.error("Failed to toggle like:", err);
+      toast.error("Failed to update like status");
+    }
+  };
+
+  const handleSendComment = async () => {
+    if (!requireAuth()) return;
+    const trimmed = commentInput.trim();
+    if (!trimmed) return;
+
+    setIsSubmittingComment(true);
+    try {
+      await addComment(id, trimmed);
+      setCommentInput("");
+      await loadComments();
+      toast.success("Comment posted!");
+    } catch (err) {
+      console.error("Failed to post comment:", err);
+      toast.error(err.response?.data?.message || "Failed to post comment");
+    } finally {
+      setIsSubmittingComment(false);
+    }
+  };
+
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
       toast.success("Copied!", {
-        description: "This article has been copied to your clipboard.",
+        description: "This article link has been copied to your clipboard.",
       });
     } catch (err) {
       console.error("Failed to copy link:", err);
@@ -120,7 +183,9 @@ function ViewPostPage() {
                 </div>
 
                 <PostActions
-                  likes={post.likes}
+                  likesCount={likesCount}
+                  isLiked={isLiked}
+                  onToggleLike={handleToggleLike}
                   onRequireAuth={requireAuth}
                   onCopyLink={handleCopyLink}
                   onShare={handleShare}
@@ -131,7 +196,9 @@ function ViewPostPage() {
                   <div className="rounded-2xl border border-border bg-white p-4">
                     <textarea
                       rows={4}
-                      placeholder="What are your thoughts?"
+                      placeholder={isLoggedIn ? "What are your thoughts?" : "Log in to post a comment..."}
+                      value={commentInput}
+                      onChange={(e) => setCommentInput(e.target.value)}
                       onFocus={() => requireAuth()}
                       readOnly={!isLoggedIn}
                       className="w-full resize-none border-0 bg-transparent text-base font-medium text-brown-600 outline-none placeholder:text-brown-400"
@@ -139,46 +206,51 @@ function ViewPostPage() {
                     <div className="flex justify-end">
                       <Button
                         type="button"
-                        className="h-10 rounded-full bg-brown-600 px-8 text-base font-medium text-white hover:bg-brown-600/90"
-                        onClick={() => requireAuth()}
+                        disabled={isSubmittingComment || !commentInput.trim()}
+                        className="h-10 rounded-full bg-brown-600 px-8 text-base font-medium text-white hover:bg-brown-600/90 disabled:opacity-50"
+                        onClick={handleSendComment}
                       >
-                        Send
+                        {isSubmittingComment ? "Posting..." : "Send"}
                       </Button>
                     </div>
                   </div>
 
                   <div className="flex flex-col">
-                    {MOCK_COMMENTS.map((comment, index) => (
-                      <div
-                        key={comment.id}
-                        className={`flex gap-3 py-6 sm:gap-4 ${index < MOCK_COMMENTS.length - 1 ? "border-b border-border" : ""}`}
-                      >
-                        {comment.avatar ? (
-                          <img
-                            src={comment.avatar}
-                            alt={comment.name}
-                            className="size-11 shrink-0 rounded-full object-cover"
-                          />
-                        ) : (
-                          <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-muted">
-                            <UserRound className="size-5 text-muted-foreground" />
-                          </span>
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <div className="mb-2 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
-                            <p className="text-xl font-semibold text-brown-600 sm:text-base">
-                              {comment.name}
-                            </p>
-                            <p className="text-xs font-medium text-brown-400 sm:text-sm">
-                              {comment.date}
+                    {comments.length === 0 ? (
+                      <p className="py-6 text-center text-muted-foreground">No comments yet. Be the first to comment!</p>
+                    ) : (
+                      comments.map((comment, index) => (
+                        <div
+                          key={comment.id}
+                          className={`flex gap-3 py-6 sm:gap-4 ${index < comments.length - 1 ? "border-b border-border" : ""}`}
+                        >
+                          {comment.profile_pic ? (
+                            <img
+                              src={comment.profile_pic}
+                              alt={comment.name || comment.username}
+                              className="size-11 shrink-0 rounded-full object-cover"
+                            />
+                          ) : (
+                            <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-muted">
+                              <UserRound className="size-5 text-muted-foreground" />
+                            </span>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <div className="mb-2 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+                              <p className="text-xl font-semibold text-brown-600 sm:text-base">
+                                {comment.name || comment.username || "User"}
+                              </p>
+                              <p className="text-xs font-medium text-brown-400 sm:text-sm">
+                                {formatDate(comment.created_at)}
+                              </p>
+                            </div>
+                            <p className="text-base font-medium leading-6 text-brown-500">
+                              {comment.comment_text}
                             </p>
                           </div>
-                          <p className="text-base font-medium leading-6 text-brown-500">
-                            {comment.body}
-                          </p>
                         </div>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                 </section>
               </div>

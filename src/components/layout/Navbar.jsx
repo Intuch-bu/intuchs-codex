@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Bell, ChevronDown, Menu, Search, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,14 +11,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import SiteLogo from "@/components/layout/SiteLogo";
 import { useAuth } from "@/context/useAuth";
-import { NOTIFICATIONS } from "@/constants/site";
+import { fetchNotifications } from "@/api/blogApi";
 
 function UserAvatar({ user, className = "size-8" }) {
-  if (user?.profileImage) {
+  if (user?.profileImage || user?.profile_pic) {
     return (
       <img
-        src={user.profileImage}
-        alt={user.name}
+        src={user.profileImage || user.profile_pic}
+        alt={user.name || "User"}
         className={`${className} rounded-full object-cover`}
       />
     );
@@ -35,6 +36,21 @@ function UserAvatar({ user, className = "size-8" }) {
 function Navbar() {
   const navigate = useNavigate();
   const { user, isLoggedIn, logout } = useAuth();
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    const loadNotifications = async () => {
+      try {
+        const res = await fetchNotifications();
+        setNotifications(res.data || []);
+      } catch (err) {
+        console.error("Failed to load notifications:", err);
+      }
+    };
+
+    loadNotifications();
+  }, [isLoggedIn]);
 
   const handleLogout = () => {
     logout();
@@ -70,38 +86,42 @@ function Navbar() {
                 <DropdownMenuContent align="end" className="w-80 p-2">
                   <p className="px-2 py-1.5 text-sm font-semibold">Notifications</p>
                   <DropdownMenuSeparator />
-                  {NOTIFICATIONS.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex gap-3 rounded-xl px-2 py-3 hover:bg-muted"
-                    >
-                      {item.avatar ? (
-                        <img
-                          src={item.avatar}
-                          alt={item.title}
-                          className="size-9 rounded-full object-cover"
-                        />
-                      ) : (
-                        <span className="inline-flex size-9 items-center justify-center rounded-full bg-muted">
-                          <UserRound className="size-4 text-muted-foreground" />
-                        </span>
-                      )}
-                      <div className="min-w-0">
-                        <p className="text-sm">
-                          <span className="font-medium">{item.title}</span>{" "}
-                          <span className="text-muted-foreground">{item.message}</span>
-                        </p>
-                        <p className="mt-1 text-xs text-muted-foreground">{item.time}</p>
+                  {notifications.length === 0 ? (
+                    <p className="p-4 text-center text-xs text-muted-foreground">No recent notifications</p>
+                  ) : (
+                    notifications.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex gap-3 rounded-xl px-2 py-3 hover:bg-muted"
+                      >
+                        {item.avatar ? (
+                          <img
+                            src={item.avatar}
+                            alt={item.title}
+                            className="size-9 rounded-full object-cover"
+                          />
+                        ) : (
+                          <span className="inline-flex size-9 items-center justify-center rounded-full bg-muted">
+                            <UserRound className="size-4 text-muted-foreground" />
+                          </span>
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-sm">
+                            <span className="font-medium">{item.title}</span>{" "}
+                            <span className="text-muted-foreground">{item.message}</span>
+                          </p>
+                          <p className="mt-1 text-xs text-muted-foreground">{item.time}</p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
 
               <DropdownMenu>
                 <DropdownMenuTrigger className="inline-flex cursor-pointer items-center gap-2 rounded-full px-2 py-1 hover:bg-muted">
                   <UserAvatar user={user} />
-                  <span className="text-sm font-medium">{user.name}</span>
+                  <span className="text-sm font-medium">{user.name || user.username || user.email}</span>
                   <ChevronDown className="size-4 text-muted-foreground" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
@@ -156,7 +176,7 @@ function Navbar() {
                   <>
                     <div className="flex items-center gap-3 pb-2">
                       <UserAvatar user={user} className="size-10" />
-                      <span className="font-medium">{user.name}</span>
+                      <span className="font-medium">{user.name || user.username || user.email}</span>
                     </div>
                     <Button asChild variant="outline" className="h-12 w-full rounded-full">
                       <Link to="/profile">Profile</Link>
