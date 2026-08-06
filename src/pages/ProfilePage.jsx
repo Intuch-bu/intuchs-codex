@@ -6,14 +6,15 @@ import MemberPageLayout from "@/components/member/MemberPageLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/useAuth";
-import { isValidEmail } from "@/lib/mockAuth";
+
+const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 function createProfileForm(user) {
   return {
     name: user?.name ?? "",
     username: user?.username ?? "",
     email: user?.email ?? "",
-    profileImage: user?.profileImage ?? "",
+    profileImage: user?.profileImage ?? user?.profile_pic ?? "",
   };
 }
 
@@ -22,6 +23,7 @@ function ProfilePage() {
   const fileInputRef = useRef(null);
   const [form, setForm] = useState(() => createProfileForm(user));
   const [errors, setErrors] = useState({});
+  const [isSaving, setIsSaving] = useState(false);
 
   if (!isLoggedIn) {
     return <Navigate to="/login" replace />;
@@ -67,27 +69,36 @@ function ProfilePage() {
     return Object.keys(nextErrors).length === 0;
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (!validate()) return;
 
-    const result = updateProfile({
-      name: form.name.trim(),
-      username: form.username.trim(),
-      email: form.email.trim(),
-      profileImage: form.profileImage,
-    });
+    setIsSaving(true);
+    try {
+      const result = await updateProfile({
+        name: form.name.trim(),
+        username: form.username.trim(),
+        email: form.email.trim(),
+        profileImage: form.profileImage,
+      });
 
-    if (!result.ok) {
-      if (result.field) {
-        setErrors((current) => ({ ...current, [result.field]: result.error }));
+      if (!result.ok) {
+        if (result.field) {
+          setErrors((current) => ({ ...current, [result.field]: result.error }));
+        } else {
+          toast.error(result.error || "Failed to update profile");
+        }
+        return;
       }
-      return;
-    }
 
-    toast.success("Updated profile", {
-      description: "Your profile has been successfully updated.",
-    });
+      toast.success("Updated profile", {
+        description: "Your profile has been successfully updated.",
+      });
+    } catch (err) {
+      toast.error(err.message || "Failed to update profile");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -173,9 +184,10 @@ function ProfilePage() {
 
           <Button
             type="submit"
-            className="h-12 w-fit rounded-full bg-brown-600 px-10 text-base font-medium text-white hover:bg-brown-600/90"
+            disabled={isSaving}
+            className="h-12 w-fit rounded-full bg-brown-600 px-10 text-base font-medium text-white hover:bg-brown-600/90 disabled:opacity-50"
           >
-            Save
+            {isSaving ? "Saving..." : "Save"}
           </Button>
         </div>
       </form>

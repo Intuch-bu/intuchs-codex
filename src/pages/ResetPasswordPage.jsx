@@ -65,22 +65,29 @@ function ResetPasswordPage() {
     setShowConfirm(true);
   };
 
-  const handleConfirmReset = () => {
-    const result = resetPassword(form.currentPassword, form.newPassword);
+  const handleConfirmReset = async () => {
+    try {
+      const result = await resetPassword(form.currentPassword, form.newPassword);
 
-    if (!result.ok) {
-      if (result.field) {
-        setErrors((current) => ({ ...current, [result.field]: result.error }));
+      if (!result.ok) {
+        if (result.field) {
+          setErrors((current) => ({ ...current, [result.field]: result.error }));
+        } else {
+          toast.error(result.error || "Failed to reset password");
+        }
+        setShowConfirm(false);
+        return;
       }
-      setShowConfirm(false);
-      return;
-    }
 
-    setShowConfirm(false);
-    setForm(initialForm);
-    toast.success("Password updated", {
-      description: "Your password has been successfully reset.",
-    });
+      setShowConfirm(false);
+      setForm(initialForm);
+      toast.success("Password updated", {
+        description: "Your password has been successfully reset.",
+      });
+    } catch (err) {
+      setShowConfirm(false);
+      toast.error(err.message || "Failed to reset password");
+    }
   };
 
   return (

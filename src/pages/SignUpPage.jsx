@@ -4,12 +4,9 @@ import { CircleCheck } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  findUserByEmail,
-  findUserByUsername,
-  isValidEmail,
-} from "@/lib/mockAuth";
 import { useAuth } from "@/context/useAuth";
+
+const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 const initialForm = {
   name: "",
@@ -23,11 +20,12 @@ function SignUpPage() {
   const { registerUser } = useAuth();
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
   const handleChange = (field) => (event) => {
     setForm((current) => ({ ...current, [field]: event.target.value }));
-    setErrors((current) => ({ ...current, [field]: "" }));
+    setErrors((current) => ({ ...current, [field]: "", form: "" }));
   };
 
   const validate = () => {
@@ -39,16 +37,12 @@ function SignUpPage() {
 
     if (!form.username.trim()) {
       nextErrors.username = "Username is required";
-    } else if (findUserByUsername(form.username.trim())) {
-      nextErrors.username = "Username is already taken";
     }
 
     if (!form.email.trim()) {
       nextErrors.email = "Email is required";
     } else if (!isValidEmail(form.email.trim())) {
       nextErrors.email = "Email must be a valid email";
-    } else if (findUserByEmail(form.email.trim())) {
-      nextErrors.email = "Email is already taken";
     }
 
     if (!form.password) {
@@ -61,21 +55,32 @@ function SignUpPage() {
     return Object.keys(nextErrors).length === 0;
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!validate()) {
       return;
     }
 
-    registerUser({
-      name: form.name.trim(),
-      username: form.username.trim(),
-      email: form.email.trim(),
-      password: form.password,
-    });
+    setIsSubmitting(true);
 
-    setIsSuccess(true);
+    try {
+      await registerUser({
+        name: form.name.trim(),
+        username: form.username.trim(),
+        email: form.email.trim(),
+        password: form.password,
+      });
+
+      setIsSuccess(true);
+    } catch (err) {
+      setErrors((current) => ({
+        ...current,
+        form: err.message || "Registration failed. Please try again.",
+      }));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -173,12 +178,17 @@ function SignUpPage() {
                   )}
                 </div>
 
+                {errors.form && (
+                  <p className="text-center text-sm font-medium text-destructive">{errors.form}</p>
+                )}
+
                 <div className="flex justify-center pt-2">
                   <Button
                     type="submit"
-                    className="h-12 rounded-full bg-brown-600 px-10 text-base font-medium text-white hover:bg-brown-600/90"
+                    disabled={isSubmitting}
+                    className="h-12 rounded-full bg-brown-600 px-10 text-base font-medium text-white hover:bg-brown-600/90 disabled:opacity-50"
                   >
-                    Sign up
+                    {isSubmitting ? "Signing up..." : "Sign up"}
                   </Button>
                 </div>
               </form>

@@ -9,24 +9,31 @@ function LoginPage() {
   const navigate = useNavigate();
   const { loginUser } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleChange = (field) => (event) => {
     setForm((current) => ({ ...current, [field]: event.target.value }));
     setShowError(false);
+    setErrorMessage("");
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    setIsSubmitting(true);
+    setShowError(false);
+    setErrorMessage("");
 
-    const user = loginUser(form.email.trim(), form.password);
-
-    if (!user) {
+    try {
+      await loginUser(form.email.trim(), form.password);
+      navigate("/");
+    } catch (err) {
       setShowError(true);
-      return;
+      setErrorMessage(err.message || "Your password is incorrect or this email doesn't exist.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    navigate("/");
   };
 
   return (
@@ -70,9 +77,10 @@ function LoginPage() {
             <div className="flex justify-center pt-2">
               <Button
                 type="submit"
-                className="h-12 rounded-full bg-brown-600 px-10 text-base font-medium text-white hover:bg-brown-600/90"
+                disabled={isSubmitting}
+                className="h-12 rounded-full bg-brown-600 px-10 text-base font-medium text-white hover:bg-brown-600/90 disabled:opacity-50"
               >
-                Log in
+                {isSubmitting ? "Logging in..." : "Log in"}
               </Button>
             </div>
           </form>
@@ -88,8 +96,7 @@ function LoginPage() {
 
       {showError && (
         <div className="fixed inset-x-0 bottom-0 bg-destructive px-4 py-4 text-center text-sm text-white">
-          Your password is incorrect or this email doesn&apos;t exist. Please try
-          another password or email.
+          {errorMessage || "Your password is incorrect or this email doesn't exist. Please try another password or email."}
         </div>
       )}
     </>
