@@ -6,6 +6,7 @@ import MemberPageLayout from "@/components/member/MemberPageLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/useAuth";
+import { supabase } from "@/lib/supabaseClient";
 
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -24,6 +25,7 @@ function ProfilePage() {
   const [form, setForm] = useState(() => createProfileForm(user));
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   if (!isLoggedIn) {
     return <Navigate to="/login" replace />;
@@ -34,18 +36,60 @@ function ProfilePage() {
     setErrors((current) => ({ ...current, [field]: "" }));
   };
 
-  const handleImageUpload = (event) => {
+  const handleImageUpload = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size limit", {
+        description: "Please select an image smaller than 5MB.",
+      });
+      return;
+    }
+
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${user?.id || "user"}-${Date.now()}.${fileExt}`;
+    const filePath = `avatars/${fileName}`;
+
+    setIsUploadingImage(true);
+    const toastId = toast.loading("Uploading image to Supabase Storage...");
+
+    try {
+      const { error: uploadError } = await supabase.storage
+        .from("profiles")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from("profiles")
+        .getPublicUrl(filePath);
+
+      const publicUrl = publicUrlData?.publicUrl;
+
+      if (!publicUrl) {
+        throw new Error("Could not get public URL from Supabase Storage");
+      }
+
       setForm((current) => ({
         ...current,
-        profileImage: typeof reader.result === "string" ? reader.result : "",
+        profileImage: publicUrl,
       }));
-    };
-    reader.readAsDataURL(file);
+
+      toast.success("Profile picture uploaded!", { id: toastId });
+    } catch (err) {
+      console.error("Supabase Storage upload error:", err);
+      toast.error("Upload failed", {
+        id: toastId,
+        description:
+          err.message ||
+          "Please ensure a public bucket named 'profiles' is created in Supabase Dashboard.",
+      });
+    } finally {
+      setIsUploadingImage(false);
+    }
   };
 
   const validate = () => {
@@ -127,10 +171,11 @@ function ProfilePage() {
             <Button
               type="button"
               variant="outline"
-              className="h-12 rounded-full border-brown-600 bg-white px-6 text-base font-medium text-brown-600 hover:bg-background"
+              disabled={isUploadingImage}
+              className="h-12 rounded-full border-brown-600 bg-white px-6 text-base font-medium text-brown-600 hover:bg-background disabled:opacity-50"
               onClick={() => fileInputRef.current?.click()}
             >
-              Upload profile picture
+              {isUploadingImage ? "Uploading..." : "Upload profile picture"}
             </Button>
           </div>
         </div>
