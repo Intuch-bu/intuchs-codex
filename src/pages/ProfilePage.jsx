@@ -6,7 +6,7 @@ import MemberPageLayout from "@/components/member/MemberPageLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/useAuth";
-import { supabase } from "@/lib/supabaseClient";
+import { uploadProfilePicture } from "@/api/blogApi";
 
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -47,30 +47,15 @@ function ProfilePage() {
       return;
     }
 
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${user?.id || "user"}-${Date.now()}.${fileExt}`;
-    const filePath = `avatars/${fileName}`;
-
     setIsUploadingImage(true);
     const toastId = toast.loading("Uploading image to Supabase Storage...");
 
     try {
-      const { error: uploadError } = await supabase.storage
-        .from("profiles")
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      const { data: publicUrlData } = supabase.storage
-        .from("profiles")
-        .getPublicUrl(filePath);
-
-      const publicUrl = publicUrlData?.publicUrl;
+      const response = await uploadProfilePicture(file);
+      const publicUrl = response.publicUrl;
 
       if (!publicUrl) {
-        throw new Error("Could not get public URL from Supabase Storage");
+        throw new Error("Could not get public URL from upload response");
       }
 
       setForm((current) => ({
@@ -80,12 +65,11 @@ function ProfilePage() {
 
       toast.success("Profile picture uploaded!", { id: toastId });
     } catch (err) {
-      console.error("Supabase Storage upload error:", err);
+      console.error("Upload profile picture error:", err);
       toast.error("Upload failed", {
         id: toastId,
         description:
-          err.message ||
-          "Please ensure a public bucket named 'profiles' is created in Supabase Dashboard.",
+          err.response?.data?.message || err.message || "Failed to upload profile picture.",
       });
     } finally {
       setIsUploadingImage(false);

@@ -115,6 +115,21 @@ export async function updateUserProfile(profileData) {
   return data;
 }
 
+export async function uploadProfilePicture(file) {
+  const headers = await getAuthHeaders();
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const { data } = await axios.post(`${API_BASE_URL}/users/profile-picture`, formData, {
+    headers: {
+      ...headers,
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return data;
+}
+
 // ─── Comments endpoints ───
 
 export async function fetchComments(postId) {
