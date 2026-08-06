@@ -60,7 +60,7 @@ function CategoryManagementPage() {
     setIsModalOpen(true);
   };
 
-  const handleSaveCategory = (e) => {
+  const handleSaveCategory = async (e) => {
     e.preventDefault();
     const trimmed = categoryNameInput.trim();
     if (!trimmed) {
@@ -68,36 +68,36 @@ function CategoryManagementPage() {
       return;
     }
 
-    if (editingCategory) {
-      const ok = updateCategory(editingCategory, trimmed);
-      if (!ok) {
-        setInputError("Category already exists or invalid");
-        return;
+    try {
+      if (editingCategory) {
+        await updateCategory(editingCategory, trimmed);
+        toast.success("Category updated", {
+          description: `Renamed "${editingCategory}" to "${trimmed}".`,
+        });
+      } else {
+        await addCategory(trimmed);
+        toast.success("Category created", {
+          description: `Category "${trimmed}" has been created.`,
+        });
       }
-      toast.success("Category updated", {
-        description: `Renamed "${editingCategory}" to "${trimmed}".`,
-      });
-    } else {
-      const ok = addCategory(trimmed);
-      if (!ok) {
-        setInputError("Category already exists");
-        return;
-      }
-      toast.success("Category created", {
-        description: `Category "${trimmed}" has been created.`,
-      });
+      setIsModalOpen(false);
+    } catch (err) {
+      setInputError(err.message || "Failed to save category");
     }
-
-    setIsModalOpen(false);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (!categoryToDelete) return;
-    deleteCategory(categoryToDelete);
-    toast.success("Category deleted", {
-      description: `Category "${categoryToDelete}" has been deleted.`,
-    });
+    const target = categoryToDelete;
     setCategoryToDelete(null);
+    try {
+      await deleteCategory(target);
+      toast.success("Category deleted", {
+        description: `Category "${target}" has been deleted.`,
+      });
+    } catch (err) {
+      toast.error(err.message || "Failed to delete category");
+    }
   };
 
   const actionButton = (

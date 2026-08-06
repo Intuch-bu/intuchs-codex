@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import CategorySelector from "@/components/blog/CategorySelector";
 import BlogCard from "@/components/blog/BlogCard";
 import { formatDate } from "@/lib/formatDate";
-import { fetchPosts } from "@/api/blogApi";
+import { fetchPosts, fetchCategories } from "@/api/blogApi";
 import {
   BLOG_CATEGORIES,
   DEFAULT_CATEGORY,
@@ -11,11 +11,29 @@ import {
 
 function ArticleSection() {
   const [selectedCategory, setSelectedCategory] = useState(DEFAULT_CATEGORY);
+  const [categories, setCategories] = useState(BLOG_CATEGORIES);
   const [posts, setPosts] = useState([]);
   const [nextPage, setNextPage] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefetching, setIsRefetching] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  useEffect(() => {
+    async function loadDynamicCategories() {
+      try {
+        const res = await fetchCategories();
+        const cats = res.data || res || [];
+        if (Array.isArray(cats) && cats.length > 0) {
+          const catNames = cats.map((c) => (typeof c === "string" ? c : c.name));
+          const uniqueCats = Array.from(new Set([DEFAULT_CATEGORY, ...catNames]));
+          setCategories(uniqueCats);
+        }
+      } catch (err) {
+        console.error("Failed to load categories in ArticleSection:", err);
+      }
+    }
+    loadDynamicCategories();
+  }, []);
 
   useEffect(() => {
     let isCancelled = false;
@@ -84,7 +102,7 @@ function ArticleSection() {
         <div className="flex flex-col gap-6 md:gap-8">
           <h2 className="text-2xl font-semibold text-brown-600">Latest articles</h2>
           <CategorySelector
-            categories={BLOG_CATEGORIES}
+            categories={categories}
             selectedCategory={selectedCategory}
             onCategoryChange={setSelectedCategory}
           />

@@ -4,21 +4,32 @@ import {
   createPost,
   updatePost,
   deletePost,
+  fetchCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
 } from "@/api/blogApi";
-import {
-  getStoredArticles,
-  saveStoredArticles,
-  getStoredCategories,
-  saveStoredCategories,
-} from "@/lib/adminData";
 
 export const AdminContext = createContext(null);
 
 export function AdminProvider({ children }) {
   const [articles, setArticles] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [categoryObjects, setCategoryObjects] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const loadCategories = useCallback(async () => {
+    try {
+      const res = await fetchCategories();
+      const catData = res.data || res || [];
+      if (Array.isArray(catData)) {
+        setCategoryObjects(catData);
+      }
+    } catch (err) {
+      console.error("Failed to load categories from API:", err);
+      setError("Failed to fetch categories from server.");
+    }
+  }, []);
 
   const loadArticles = useCallback(async () => {
     setIsLoading(true);
@@ -27,14 +38,13 @@ export function AdminProvider({ children }) {
       const data = await fetchPosts({ limit: 100 });
       if (data.posts && Array.isArray(data.posts)) {
         setArticles(data.posts);
-        saveStoredArticles(data.posts);
       } else {
-        setArticles(getStoredArticles());
+        setArticles([]);
       }
     } catch (err) {
       console.error("Failed to load articles from API:", err);
-      setError("Failed to fetch articles from server. Using cached data.");
-      setArticles(getStoredArticles());
+      setError("Failed to fetch articles from server.");
+      setArticles([]);
     } finally {
       setIsLoading(false);
     }
@@ -42,8 +52,8 @@ export function AdminProvider({ children }) {
 
   useEffect(() => {
     loadArticles();
-    setCategories(getStoredCategories());
-  }, [loadArticles]);
+    loadCategories();
+  }, [loadArticles, loadCategories]);
 
   const addArticle = async (articleData) => {
     try {
@@ -52,21 +62,8 @@ export function AdminProvider({ children }) {
       return true;
     } catch (err) {
       console.error("Failed to create article via API:", err);
-      // Fallback local addition if API fails
-      const fallbackArticle = {
-        id: `art-${Date.now()}`,
-        title: articleData.title.trim(),
-        category: articleData.category,
-        status: articleData.status || "draft",
-        description: articleData.description.trim(),
-        content: articleData.content || "",
-        thumbnail: articleData.thumbnail || "",
-        createdAt: new Date().toISOString(),
-      };
-      const nextArticles = [fallbackArticle, ...articles];
-      setArticles(nextArticles);
-      saveStoredArticles(nextArticles);
-      return fallbackArticle;
+      const msg = err.response?.data?.message || err.message || "Failed to create article";
+      throw new Error(msg);
     }
   };
 
@@ -77,25 +74,8 @@ export function AdminProvider({ children }) {
       return true;
     } catch (err) {
       console.error("Failed to update article via API:", err);
-      const nextArticles = articles.map((item) => {
-        if (item.id === id) {
-          return {
-            ...item,
-            title: articleData.title.trim(),
-            category: articleData.category,
-            status: articleData.status || item.status,
-            description: articleData.description.trim(),
-            content: articleData.content || "",
-            thumbnail:
-              articleData.thumbnail !== undefined ? articleData.thumbnail : item.thumbnail,
-            updatedAt: new Date().toISOString(),
-          };
-        }
-        return item;
-      });
-      setArticles(nextArticles);
-      saveStoredArticles(nextArticles);
-      return false;
+      const msg = err.response?.data?.message || err.message || "Failed to update article";
+      throw new Error(msg);
     }
   };
 
@@ -106,58 +86,91 @@ export function AdminProvider({ children }) {
       return true;
     } catch (err) {
       console.error("Failed to delete article via API:", err);
-      const nextArticles = articles.filter((item) => item.id !== id);
-      setArticles(nextArticles);
-      saveStoredArticles(nextArticles);
-      return false;
+      const msg = err.response?.data?.message || err.message || "Failed to delete article";
+      throw new Error(msg);
     }
   };
 
-  const addCategory = (name) => {
-    const trimmed = name.trim();
-    if (!trimmed || categories.includes(trimmed)) return false;
-    const nextCategories = [...categories, trimmed];
-    setCategories(nextCategories);
-    saveStoredCategories(nextCategories);
-    return true;
+  const addCategoryHandler = async (name) => {
+    const trimmed = (name || "").trim();
+    if (!trimmed) throw new Error("Category name is required");
+    try {
+      await createCategory(trimmed);
+      await loadCategories();
+      return true;
+    } catch (err) {
+      console.error("Failed to create category via API:", err);
+      const msg = err.response?.data?.message || err.message || "Failed to create category";
+      throw new Error(msg);
+    }
   };
 
-  const updateCategory = (oldName, newName) => {
-    const trimmed = newName.trim();
-    if (!trimmed || (trimmed !== oldName && categories.includes(trimmed))) return false;
+  const updateCategoryHandler = async (targetCategory, newName) => {
+    const trimmed = (newName || "").trim();
+    if (!trimmed) throw new Error("Category name is required");
 
-    const nextCategories = categories.map((cat) => (cat === oldName ? trimmed : cat));
-    setCategories(nextCategories);
-    saveStoredCategories(nextCategories);
+    let targetId = targetCategory;
+    if (typeof targetCategory === "string") {
+      const found = categoryObjects.find(
+        (c) => c.name.toLowerCase() === targetCategory.toLowerCase()
+      );
+      if (found) targetId = found.id;
+    } else if (typeof targetCategory === "object" && targetCategory?.id) {
+      targetId = targetCategory.id;
+    }
 
-    const nextArticles = articles.map((art) =>
-      art.category === oldName ? { ...art, category: trimmed } : art
-    );
-    setArticles(nextArticles);
-    saveStoredArticles(nextArticles);
-    return true;
+    try {
+      await updateCategory(targetId, trimmed);
+      await loadCategories();
+      await loadArticles();
+      return true;
+    } catch (err) {
+      console.error("Failed to update category via API:", err);
+      const msg = err.response?.data?.message || err.message || "Failed to update category";
+      throw new Error(msg);
+    }
   };
 
-  const deleteCategory = (name) => {
-    const nextCategories = categories.filter((cat) => cat !== name);
-    setCategories(nextCategories);
-    saveStoredCategories(nextCategories);
+  const deleteCategoryHandler = async (targetCategory) => {
+    let targetId = targetCategory;
+    if (typeof targetCategory === "string") {
+      const found = categoryObjects.find(
+        (c) => c.name.toLowerCase() === targetCategory.toLowerCase()
+      );
+      if (found) targetId = found.id;
+    } else if (typeof targetCategory === "object" && targetCategory?.id) {
+      targetId = targetCategory.id;
+    }
+
+    try {
+      await deleteCategory(targetId);
+      await loadCategories();
+      return true;
+    } catch (err) {
+      console.error("Failed to delete category via API:", err);
+      const msg = err.response?.data?.message || err.message || "Failed to delete category";
+      throw new Error(msg);
+    }
   };
+
+  const categories = categoryObjects.map((c) => c.name);
 
   return (
     <AdminContext.Provider
       value={{
         articles,
+        categoryObjects,
         categories,
         isLoading,
         error,
         refetchArticles: loadArticles,
+        refetchCategories: loadCategories,
         addArticle,
         updateArticle,
         deleteArticle,
-        addCategory,
-        updateCategory,
-        deleteCategory,
+        addCategory: addCategoryHandler,
+        updateCategory: updateCategoryHandler,
+        deleteCategory: deleteCategoryHandler,
       }}
     >
       {children}

@@ -62,3 +62,23 @@ export async function deletePost(id) {
   const { data } = await axios.delete(`${API_BASE_URL}/posts/${id}`);
   return data;
 }
+
+export async function fetchCategories() {
+  const { data } = await axios.get(`${API_BASE_URL}/categories`);
+  return data;
+}
+
+export async function createCategory(name) {
+  const { data } = await axios.post(`${API_BASE_URL}/categories`, { name });
+  return data;
+}
+
+export async function updateCategory(id, name) {
+  const { data } = await axios.put(`${API_BASE_URL}/categories/${id}`, { name });
+  return data;
+}
+
+export async function deleteCategory(id) {
+  const { data } = await axios.delete(`${API_BASE_URL}/categories/${id}`);
+  return data;
+}
