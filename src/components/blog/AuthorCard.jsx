@@ -1,22 +1,16 @@
-import {
-  DEFAULT_AUTHOR_AVATAR,
-  DEFAULT_AUTHOR_BIO,
-  SITE_AUTHOR,
-} from "@/constants/site";
-
 function AuthorCard({ author, author_name, author_avatar, author_bio }) {
   const authorName =
     author_name ||
     (typeof author === "object" ? author?.name : author) ||
-    SITE_AUTHOR.name;
+    "Author";
   const authorPic =
     author_avatar ||
     (typeof author === "object" ? author?.avatar : null) ||
-    DEFAULT_AUTHOR_AVATAR;
+    "";
   const bioText =
     author_bio ||
     (typeof author === "object" ? author?.bio : null) ||
-    DEFAULT_AUTHOR_BIO;
+    "";
 
   return (
     <aside className="lg:w-[305px] lg:shrink-0">

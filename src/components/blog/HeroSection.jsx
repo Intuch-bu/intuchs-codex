@@ -1,12 +1,16 @@
 import heroImg from "@/assets/hero.jpg";
-import { SITE_AUTHOR } from "@/constants/site";
 import { useAuth } from "@/context/useAuth";
 
 function HeroSection() {
-  const { user } = useAuth();
-  const authorName = user?.name || user?.username || SITE_AUTHOR.name;
-  const authorBio = user?.bio || SITE_AUTHOR.bio;
-  const authorBioExtra = user?.bio_extra || user?.bioExtra || SITE_AUTHOR.bioExtra;
+  const { user, isLoggedIn } = useAuth();
+
+  if (!isLoggedIn || !user) {
+    return null;
+  }
+
+  const authorName = user?.name || user?.username || "Author";
+  const authorBio = user?.bio || "";
+  const authorBioExtra = user?.bio_extra || user?.bioExtra || "";
   const authorPic = user?.profileImage || user?.profile_pic || heroImg;
 
   return (
@@ -37,7 +41,7 @@ function HeroSection() {
             {authorName}
           </h2>
           <div className="mt-3 space-y-4 text-base font-medium leading-6 text-brown-400">
-            <p>{authorBio}</p>
+            {authorBio && <p>{authorBio}</p>}
             {authorBioExtra && <p>{authorBioExtra}</p>}
           </div>
         </div>
