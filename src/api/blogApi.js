@@ -3,7 +3,7 @@ import { DEFAULT_CATEGORY } from "@/constants/blog";
 import { supabase } from "@/lib/supabaseClient";
 
 export const API_BASE_URL = (
-  import.meta.env.VITE_API_BASE_URL || "https://blogpost-server-flax.vercel.app"
+  import.meta.env.VITE_API_BASE_URL || ""
 ).replace(/\/+$/, "");
 
 export const DEFAULT_POST_IMAGE =
