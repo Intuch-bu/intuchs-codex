@@ -1,10 +1,13 @@
 import { Link } from "react-router-dom";
-import { DEFAULT_AUTHOR_AVATAR } from "@/constants/site";
+import { DEFAULT_AUTHOR_AVATAR, SITE_AUTHOR } from "@/constants/site";
 import { DEFAULT_POST_IMAGE } from "@/api/blogApi";
 
-function BlogCard({ id, image, category, title, description, author, date }) {
+function BlogCard({ id, image, category, title, description, author, author_name, author_avatar, date }) {
   const authorName =
-    typeof author === "object" ? author?.name || "Thompson P." : author || "Thompson P.";
+    author_name ||
+    (typeof author === "object" ? author?.name : author) ||
+    SITE_AUTHOR.name;
+  const authorPic = author_avatar || (typeof author === "object" ? author?.avatar : null) || DEFAULT_AUTHOR_AVATAR;
   const categoryName =
     typeof category === "object" ? category?.name || "General" : category || "General";
 
@@ -45,7 +48,7 @@ function BlogCard({ id, image, category, title, description, author, date }) {
           <div className="flex items-center gap-2">
             <img
               className="size-6 rounded-full object-cover"
-              src={DEFAULT_AUTHOR_AVATAR}
+              src={authorPic}
               alt={authorName}
             />
             <span className="text-brown-500">{authorName}</span>

@@ -6,6 +6,7 @@ import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
 import ProfilePage from "./pages/ProfilePage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import NotificationPage from "./pages/NotificationPage";
 import ArticleManagementPage from "./pages/admin/ArticleManagementPage";
 import ArticleFormPage from "./pages/admin/ArticleFormPage";
 import CategoryManagementPage from "./pages/admin/CategoryManagementPage";
@@ -22,6 +23,7 @@ function App() {
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/notifications" element={<NotificationPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Admin Part Routes */}

@@ -27,10 +27,6 @@ function ArticleManagementPage() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [articleToDelete, setArticleToDelete] = useState(null);
 
-  if (!isLoggedIn) {
-    return <Navigate to="/login" replace />;
-  }
-
   const filteredArticles = useMemo(() => {
     return articles.filter((art) => {
       const matchesSearch =
@@ -49,6 +45,10 @@ function ArticleManagementPage() {
       return matchesSearch && matchesStatus && matchesCategory;
     });
   }, [articles, searchTerm, statusFilter, categoryFilter]);
+
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace />;
+  }
 
   const handleDeleteConfirm = async () => {
     if (!articleToDelete) return;
@@ -157,7 +157,7 @@ function ArticleManagementPage() {
                 filteredArticles.map((art) => {
                   const isPublished = art.status === "published" || Number(art.status_id) === 1;
                   const itemImage = art.image || art.thumbnail;
-                  const dateFormatted = new Date(art.date || art.createdAt || Date.now()).toLocaleDateString("en-US", {
+                  const dateFormatted = new Date(art.date || art.createdAt || "2026-01-01").toLocaleDateString("en-US", {
                     month: "short",
                     day: "numeric",
                     year: "numeric",

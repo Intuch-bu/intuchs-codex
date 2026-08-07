@@ -28,10 +28,6 @@ function CategoryManagementPage() {
   const [inputError, setInputError] = useState("");
   const [categoryToDelete, setCategoryToDelete] = useState(null);
 
-  if (!isLoggedIn) {
-    return <Navigate to="/login" replace />;
-  }
-
   const filteredCategories = useMemo(() => {
     return categories.filter((cat) =>
       cat.toLowerCase().includes(searchTerm.toLowerCase())
@@ -45,6 +41,10 @@ function CategoryManagementPage() {
     });
     return counts;
   }, [articles]);
+
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace />;
+  }
 
   const handleOpenCreateModal = () => {
     setEditingCategory(null);

@@ -17,40 +17,40 @@ function ArticleFormPage() {
 
   const isEditMode = Boolean(id);
 
-  const [form, setForm] = useState({
-    title: "",
-    category: categories[0] || "General",
-    description: "",
-    content: "",
-    thumbnail: "",
-  });
-
-  const [errors, setErrors] = useState({});
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
+  const [form, setForm] = useState(() => {
     if (isEditMode && id) {
       const existing = articles.find((item) => String(item.id) === String(id));
       if (existing) {
-        setForm({
+        return {
           title: existing.title || "",
           category: existing.category || categories[0] || "General",
           description: existing.description || "",
           content: existing.content || "",
           thumbnail: existing.thumbnail || existing.image || "",
-        });
-      } else {
+        };
+      }
+    }
+    return {
+      title: "",
+      category: categories[0] || "General",
+      description: "",
+      content: "",
+      thumbnail: "",
+    };
+  });
+
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (isEditMode && id && articles.length > 0) {
+      const existing = articles.find((item) => String(item.id) === String(id));
+      if (!existing) {
         toast.error("Article not found");
         navigate("/admin/articles");
       }
-    } else if (categories.length > 0) {
-      setForm((prev) => ({
-        ...prev,
-        category: prev.category || categories[0],
-      }));
     }
-  }, [id, isEditMode, articles, categories, navigate]);
+  }, [id, isEditMode, articles, navigate]);
 
   if (!isLoggedIn) {
     return <Navigate to="/login" replace />;

@@ -1,4 +1,5 @@
-import { createContext, useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { AdminContext } from "./AdminContextCore";
 import {
   fetchPosts,
   createPost,
@@ -9,8 +10,6 @@ import {
   updateCategory,
   deleteCategory,
 } from "@/api/blogApi";
-
-export const AdminContext = createContext(null);
 
 export function AdminProvider({ children }) {
   const [articles, setArticles] = useState([]);
@@ -51,8 +50,17 @@ export function AdminProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    loadArticles();
-    loadCategories();
+    let active = true;
+    const init = async () => {
+      await loadArticles();
+      if (active) {
+        await loadCategories();
+      }
+    };
+    init();
+    return () => {
+      active = false;
+    };
   }, [loadArticles, loadCategories]);
 
   const addArticle = async (articleData) => {
@@ -63,7 +71,7 @@ export function AdminProvider({ children }) {
     } catch (err) {
       console.error("Failed to create article via API:", err);
       const msg = err.response?.data?.message || err.message || "Failed to create article";
-      throw new Error(msg);
+      throw new Error(msg, { cause: err });
     }
   };
 
@@ -75,7 +83,7 @@ export function AdminProvider({ children }) {
     } catch (err) {
       console.error("Failed to update article via API:", err);
       const msg = err.response?.data?.message || err.message || "Failed to update article";
-      throw new Error(msg);
+      throw new Error(msg, { cause: err });
     }
   };
 
@@ -87,7 +95,7 @@ export function AdminProvider({ children }) {
     } catch (err) {
       console.error("Failed to delete article via API:", err);
       const msg = err.response?.data?.message || err.message || "Failed to delete article";
-      throw new Error(msg);
+      throw new Error(msg, { cause: err });
     }
   };
 
@@ -101,7 +109,7 @@ export function AdminProvider({ children }) {
     } catch (err) {
       console.error("Failed to create category via API:", err);
       const msg = err.response?.data?.message || err.message || "Failed to create category";
-      throw new Error(msg);
+      throw new Error(msg, { cause: err });
     }
   };
 
@@ -127,7 +135,7 @@ export function AdminProvider({ children }) {
     } catch (err) {
       console.error("Failed to update category via API:", err);
       const msg = err.response?.data?.message || err.message || "Failed to update category";
-      throw new Error(msg);
+      throw new Error(msg, { cause: err });
     }
   };
 
@@ -149,7 +157,7 @@ export function AdminProvider({ children }) {
     } catch (err) {
       console.error("Failed to delete category via API:", err);
       const msg = err.response?.data?.message || err.message || "Failed to delete category";
-      throw new Error(msg);
+      throw new Error(msg, { cause: err });
     }
   };
 

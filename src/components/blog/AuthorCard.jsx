@@ -1,11 +1,22 @@
 import {
   DEFAULT_AUTHOR_AVATAR,
   DEFAULT_AUTHOR_BIO,
+  SITE_AUTHOR,
 } from "@/constants/site";
 
-function AuthorCard({ author }) {
+function AuthorCard({ author, author_name, author_avatar, author_bio }) {
   const authorName =
-    typeof author === "object" ? author?.name || "Thompson P." : author || "Thompson P.";
+    author_name ||
+    (typeof author === "object" ? author?.name : author) ||
+    SITE_AUTHOR.name;
+  const authorPic =
+    author_avatar ||
+    (typeof author === "object" ? author?.avatar : null) ||
+    DEFAULT_AUTHOR_AVATAR;
+  const bioText =
+    author_bio ||
+    (typeof author === "object" ? author?.bio : null) ||
+    DEFAULT_AUTHOR_BIO;
 
   return (
     <aside className="lg:w-[305px] lg:shrink-0">
@@ -13,7 +24,7 @@ function AuthorCard({ author }) {
         <div className="mb-3 flex items-center gap-3">
           <img
             className="size-11 rounded-full object-cover"
-            src={DEFAULT_AUTHOR_AVATAR}
+            src={authorPic}
             alt={authorName}
           />
           <div>
@@ -22,7 +33,7 @@ function AuthorCard({ author }) {
           </div>
         </div>
         <p className="text-base font-medium leading-6 text-brown-400">
-          {DEFAULT_AUTHOR_BIO}
+          {bioText}
         </p>
       </div>
     </aside>
