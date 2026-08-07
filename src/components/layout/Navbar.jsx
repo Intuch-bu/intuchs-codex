@@ -84,15 +84,21 @@ function Navbar() {
                   <Bell className="size-5" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-80 p-2">
-                  <p className="px-2 py-1.5 text-sm font-semibold">Notifications</p>
+                  <div className="flex items-center justify-between px-2 py-1.5">
+                    <p className="text-sm font-semibold">Notifications</p>
+                    <Link to="/notifications" className="text-xs font-medium text-brown-600 hover:underline">
+                      View all
+                    </Link>
+                  </div>
                   <DropdownMenuSeparator />
                   {notifications.length === 0 ? (
                     <p className="p-4 text-center text-xs text-muted-foreground">No recent notifications</p>
                   ) : (
-                    notifications.map((item) => (
+                    notifications.slice(0, 5).map((item) => (
                       <div
                         key={item.id}
-                        className="flex gap-3 rounded-xl px-2 py-3 hover:bg-muted"
+                        className="flex gap-3 rounded-xl px-2 py-3 hover:bg-muted cursor-pointer"
+                        onClick={() => navigate(item.postId ? `/post/${item.postId}` : "/notifications")}
                       >
                         {item.avatar ? (
                           <img
@@ -125,11 +131,16 @@ function Navbar() {
                   <ChevronDown className="size-4 text-muted-foreground" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={() => navigate("/admin/articles")}>
-                    Admin Management
-                  </DropdownMenuItem>
+                  {user?.role === "admin" && (
+                    <DropdownMenuItem onClick={() => navigate("/admin/articles")}>
+                      Admin Management
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={() => navigate("/profile")}>
                     Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/notifications")}>
+                    Notifications
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/reset-password")}>
                     Reset password
@@ -178,8 +189,16 @@ function Navbar() {
                       <UserAvatar user={user} className="size-10" />
                       <span className="font-medium">{user.name || user.username || user.email}</span>
                     </div>
+                    {user?.role === "admin" && (
+                      <Button asChild variant="outline" className="h-12 w-full rounded-full">
+                        <Link to="/admin/articles">Admin Management</Link>
+                      </Button>
+                    )}
                     <Button asChild variant="outline" className="h-12 w-full rounded-full">
                       <Link to="/profile">Profile</Link>
+                    </Button>
+                    <Button asChild variant="outline" className="h-12 w-full rounded-full">
+                      <Link to="/notifications">Notifications</Link>
                     </Button>
                     <Button asChild variant="outline" className="h-12 w-full rounded-full">
                       <Link to="/reset-password">Reset password</Link>

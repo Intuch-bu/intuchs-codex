@@ -20,7 +20,7 @@ import {
 } from "@/api/blogApi";
 
 function ViewPostPage() {
-  const { isLoggedIn, user } = useAuth();
+  const { isLoggedIn } = useAuth();
   const { id } = useParams();
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
@@ -179,7 +179,12 @@ function ViewPostPage() {
                 </div>
 
                 <div className="lg:hidden">
-                  <AuthorCard author={post.author} />
+                  <AuthorCard
+                    author={post.author}
+                    author_name={post.author_name}
+                    author_avatar={post.author_avatar}
+                    author_bio={post.author_bio}
+                  />
                 </div>
 
                 <PostActions
@@ -256,7 +261,12 @@ function ViewPostPage() {
               </div>
 
               <div className="hidden lg:block">
-                <AuthorCard author={post.author} />
+                <AuthorCard
+                  author={post.author}
+                  author_name={post.author_name}
+                  author_avatar={post.author_avatar}
+                  author_bio={post.author_bio}
+                />
               </div>
             </div>
           </article>

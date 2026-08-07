@@ -119,6 +119,8 @@ export function AuthProvider({ children }) {
           name: updates.name,
           username: updates.username,
           profile_pic: updates.profileImage || updates.profile_pic || "",
+          bio: updates.bio || "",
+          bio_extra: updates.bio_extra || "",
         })
       );
 
