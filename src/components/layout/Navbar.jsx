@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Bell, ChevronDown, Menu, Search, UserRound } from "lucide-react";
+import { Bell, ChevronDown, Menu, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -65,17 +65,6 @@ function Navbar() {
 
           {isLoggedIn ? (
             <div className="hidden items-center gap-3 md:flex">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="rounded-full"
-                aria-label="Search"
-                onClick={() => navigate("/#latest-articles")}
-              >
-                <Search className="size-5" />
-              </Button>
-
               <DropdownMenu>
                 <DropdownMenuTrigger
                   className="inline-flex size-9 cursor-pointer items-center justify-center rounded-full hover:bg-muted"
