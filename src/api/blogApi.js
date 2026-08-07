@@ -130,6 +130,21 @@ export async function uploadProfilePicture(file) {
   return data;
 }
 
+export async function uploadPostImage(file) {
+  const headers = await getAuthHeaders();
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const { data } = await axios.post(`${API_BASE_URL}/posts/upload`, formData, {
+    headers: {
+      ...headers,
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return data;
+}
+
 // ─── Comments endpoints ───
 
 export async function fetchComments(postId) {

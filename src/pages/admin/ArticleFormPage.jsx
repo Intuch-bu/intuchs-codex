@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/useAuth";
 import { useAdmin } from "@/context/useAdmin";
+import { uploadPostImage } from "@/api/blogApi";
 
 function ArticleFormPage() {
   const { isLoggedIn } = useAuth();
@@ -14,6 +15,7 @@ function ArticleFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const isEditMode = Boolean(id);
 
@@ -61,10 +63,11 @@ function ArticleFormPage() {
     setErrors((current) => ({ ...current, [field]: "" }));
   };
 
-  const handleImageUpload = (event) => {
+  const handleImageUpload = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Show temporary local preview
     const reader = new FileReader();
     reader.onload = () => {
       setForm((current) => ({
@@ -73,6 +76,27 @@ function ArticleFormPage() {
       }));
     };
     reader.readAsDataURL(file);
+
+    // Upload to server/Supabase Storage
+    setIsUploading(true);
+    const toastId = toast.loading("Uploading thumbnail image...");
+    try {
+      const res = await uploadPostImage(file);
+      if (res?.publicUrl) {
+        setForm((current) => ({
+          ...current,
+          thumbnail: res.publicUrl,
+        }));
+        toast.success("Thumbnail uploaded successfully!", { id: toastId });
+      } else {
+        toast.dismiss(toastId);
+      }
+    } catch (err) {
+      console.error("Failed to upload thumbnail:", err);
+      toast.error("Failed to upload image to storage, using fallback preview", { id: toastId });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const validate = () => {
