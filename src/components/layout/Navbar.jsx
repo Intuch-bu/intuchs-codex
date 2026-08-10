@@ -100,30 +100,14 @@ function Navbar() {
             <div className="hidden items-center gap-3 md:flex">
               <DropdownMenu>
                 <DropdownMenuTrigger
-                  className="relative inline-flex size-9 cursor-pointer items-center justify-center rounded-full hover:bg-muted"
+                  className="inline-flex size-9 cursor-pointer items-center justify-center rounded-full hover:bg-muted"
                   aria-label="Notifications"
                 >
                   <Bell className="size-5" />
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white shadow-xs">
-                      {unreadCount > 9 ? "9+" : unreadCount}
-                    </span>
-                  )}
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-80 p-2">
                   <div className="flex items-center justify-between px-2 py-1.5">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold">Notifications</p>
-                      {unreadCount > 0 && (
-                        <button
-                          type="button"
-                          onClick={handleMarkAllRead}
-                          className="text-[11px] text-brown-600 hover:underline flex items-center gap-1"
-                        >
-                          <CheckCheck className="size-3" /> Read all
-                        </button>
-                      )}
-                    </div>
+                    <p className="text-sm font-semibold">Notifications</p>
                     <Link to="/notifications" className="text-xs font-medium text-brown-600 hover:underline">
                       View all
                     </Link>
@@ -135,10 +119,8 @@ function Navbar() {
                     notifications.slice(0, 5).map((item) => (
                       <div
                         key={item.id}
-                        className={`flex gap-3 rounded-xl px-2 py-3 hover:bg-muted cursor-pointer transition-colors ${
-                          !item.isRead ? "bg-brand-soft/30 font-medium" : ""
-                        }`}
-                        onClick={() => handleNotificationClick(item)}
+                        className="flex gap-3 rounded-xl px-2 py-3 hover:bg-muted cursor-pointer transition-colors"
+                        onClick={() => navigate(item.postId ? `/post/${item.postId}` : "/notifications")}
                       >
                         {item.avatar ? (
                           <img
@@ -156,12 +138,7 @@ function Navbar() {
                             <span className="font-semibold">{item.title}</span>{" "}
                             <span className="text-brown-400">{item.message}</span>
                           </p>
-                          <div className="mt-1 flex items-center justify-between">
-                            <span className="text-[10px] text-muted-foreground">{item.time}</span>
-                            {!item.isRead && (
-                              <span className="size-2 rounded-full bg-destructive inline-block" />
-                            )}
-                          </div>
+                          <p className="mt-1 text-[10px] text-muted-foreground">{item.time}</p>
                         </div>
                       </div>
                     ))
