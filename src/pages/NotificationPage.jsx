@@ -1,37 +1,62 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { UserRound, Heart, MessageSquare, Sparkles } from "lucide-react";
+import { UserRound, Heart, MessageSquare, Sparkles, CheckCheck } from "lucide-react";
 import MemberPageLayout from "@/components/member/MemberPageLayout";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/useAuth";
-import { fetchNotifications } from "@/api/blogApi";
+import {
+  fetchNotifications,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+} from "@/api/blogApi";
 
 function NotificationPage() {
   const { isLoggedIn } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const loadNotifications = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetchNotifications();
+      setNotifications(res.data || []);
+    } catch (err) {
+      console.error("Failed to load notifications:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!isLoggedIn) return;
-
-    const loadNotifications = async () => {
-      setIsLoading(true);
-      try {
-        const res = await fetchNotifications();
-        setNotifications(res.data || []);
-      } catch (err) {
-        console.error("Failed to load notifications:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadNotifications();
   }, [isLoggedIn]);
 
   if (!isLoggedIn) {
     return <Navigate to="/login" replace />;
   }
+
+  const handleMarkAllRead = async () => {
+    try {
+      await markAllNotificationsAsRead();
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    } catch (err) {
+      console.error("Failed to mark all as read:", err);
+    }
+  };
+
+  const handleNotificationClick = async (item) => {
+    if (!item.isRead && typeof item.id === "number") {
+      try {
+        await markNotificationAsRead(item.id);
+        setNotifications((prev) =>
+          prev.map((n) => (n.id === item.id ? { ...n, isRead: true } : n))
+        );
+      } catch (err) {
+        console.error("Failed to mark notification as read:", err);
+      }
+    }
+  };
 
   const renderIcon = (type) => {
     switch (type) {
@@ -44,10 +69,24 @@ function NotificationPage() {
     }
   };
 
+  const hasUnread = notifications.some((n) => !n.isRead);
+
   return (
     <MemberPageLayout title="Notifications">
       <div className="flex flex-col gap-4">
-        <h2 className="text-base font-semibold text-brown-600">Recent Notifications</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-semibold text-brown-600">Recent Notifications</h2>
+          {hasUnread && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleMarkAllRead}
+              className="h-8 text-xs text-brown-600 hover:bg-muted gap-1"
+            >
+              <CheckCheck className="size-4" /> Mark all as read
+            </Button>
+          )}
+        </div>
 
         <div className="divide-y divide-border rounded-xl border border-border bg-white shadow-xs">
           {isLoading ? (
@@ -58,7 +97,9 @@ function NotificationPage() {
             notifications.map((item) => (
               <div
                 key={item.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 hover:bg-muted/30 transition-colors"
+                className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 transition-colors ${
+                  !item.isRead ? "bg-brand-soft/20 font-medium" : "hover:bg-muted/30"
+                }`}
               >
                 <div className="flex items-start gap-3">
                   <div className="relative">
@@ -82,7 +123,12 @@ function NotificationPage() {
                     <p className="text-sm text-brown-600">
                       <span className="font-semibold">{item.title}</span> {item.message}
                     </p>
-                    <span className="text-xs text-muted-foreground mt-1">{item.time}</span>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-muted-foreground">{item.time}</span>
+                      {!item.isRead && (
+                        <span className="size-2 rounded-full bg-destructive inline-block" />
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -90,6 +136,7 @@ function NotificationPage() {
                   <Button
                     asChild
                     variant="outline"
+                    onClick={() => handleNotificationClick(item)}
                     className="h-9 self-start sm:self-center rounded-full border-border bg-white px-5 text-xs font-medium text-brown-600 hover:bg-muted"
                   >
                     <Link to={`/post/${item.postId}`}>View Article</Link>

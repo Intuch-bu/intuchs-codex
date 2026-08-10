@@ -184,6 +184,19 @@ export async function toggleLike(postId) {
 // ─── Notifications endpoint ───
 
 export async function fetchNotifications() {
-  const { data } = await axios.get(`${API_BASE_URL}/notifications`);
+  const headers = await getAuthHeaders();
+  const { data } = await axios.get(`${API_BASE_URL}/notifications`, { headers });
+  return data;
+}
+
+export async function markNotificationAsRead(id) {
+  const headers = await getAuthHeaders();
+  const { data } = await axios.patch(`${API_BASE_URL}/notifications/${id}/read`, {}, { headers });
+  return data;
+}
+
+export async function markAllNotificationsAsRead() {
+  const headers = await getAuthHeaders();
+  const { data } = await axios.patch(`${API_BASE_URL}/notifications/read-all`, {}, { headers });
   return data;
 }

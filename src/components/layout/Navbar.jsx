@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Bell, ChevronDown, Menu, UserRound } from "lucide-react";
+import { Bell, ChevronDown, Menu, UserRound, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,7 +11,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import SiteLogo from "@/components/layout/SiteLogo";
 import { useAuth } from "@/context/useAuth";
-import { fetchNotifications } from "@/api/blogApi";
+import {
+  fetchNotifications,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+} from "@/api/blogApi";
 
 function UserAvatar({ user, className = "size-8" }) {
   if (user?.profileImage || user?.profile_pic) {
@@ -37,20 +41,49 @@ function Navbar() {
   const navigate = useNavigate();
   const { user, isLoggedIn, logout } = useAuth();
   const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const loadNotifications = async () => {
+    try {
+      const res = await fetchNotifications();
+      setNotifications(res.data || []);
+      setUnreadCount(res.unreadCount || (res.data || []).filter((n) => !n.isRead).length);
+    } catch (err) {
+      console.error("Failed to load notifications:", err);
+    }
+  };
 
   useEffect(() => {
     if (!isLoggedIn) return;
-    const loadNotifications = async () => {
-      try {
-        const res = await fetchNotifications();
-        setNotifications(res.data || []);
-      } catch (err) {
-        console.error("Failed to load notifications:", err);
-      }
-    };
-
     loadNotifications();
+    const interval = setInterval(loadNotifications, 15000);
+    return () => clearInterval(interval);
   }, [isLoggedIn]);
+
+  const handleNotificationClick = async (item) => {
+    if (!item.isRead && typeof item.id === "number") {
+      try {
+        await markNotificationAsRead(item.id);
+        setNotifications((prev) =>
+          prev.map((n) => (n.id === item.id ? { ...n, isRead: true } : n))
+        );
+        setUnreadCount((prev) => Math.max(0, prev - 1));
+      } catch (err) {
+        console.error("Failed to mark notification as read:", err);
+      }
+    }
+    navigate(item.postId ? `/post/${item.postId}` : "/notifications");
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await markAllNotificationsAsRead();
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      console.error("Failed to mark all as read:", err);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -67,14 +100,30 @@ function Navbar() {
             <div className="hidden items-center gap-3 md:flex">
               <DropdownMenu>
                 <DropdownMenuTrigger
-                  className="inline-flex size-9 cursor-pointer items-center justify-center rounded-full hover:bg-muted"
+                  className="relative inline-flex size-9 cursor-pointer items-center justify-center rounded-full hover:bg-muted"
                   aria-label="Notifications"
                 >
                   <Bell className="size-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white shadow-xs">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-80 p-2">
                   <div className="flex items-center justify-between px-2 py-1.5">
-                    <p className="text-sm font-semibold">Notifications</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold">Notifications</p>
+                      {unreadCount > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleMarkAllRead}
+                          className="text-[11px] text-brown-600 hover:underline flex items-center gap-1"
+                        >
+                          <CheckCheck className="size-3" /> Read all
+                        </button>
+                      )}
+                    </div>
                     <Link to="/notifications" className="text-xs font-medium text-brown-600 hover:underline">
                       View all
                     </Link>
@@ -86,26 +135,33 @@ function Navbar() {
                     notifications.slice(0, 5).map((item) => (
                       <div
                         key={item.id}
-                        className="flex gap-3 rounded-xl px-2 py-3 hover:bg-muted cursor-pointer"
-                        onClick={() => navigate(item.postId ? `/post/${item.postId}` : "/notifications")}
+                        className={`flex gap-3 rounded-xl px-2 py-3 hover:bg-muted cursor-pointer transition-colors ${
+                          !item.isRead ? "bg-brand-soft/30 font-medium" : ""
+                        }`}
+                        onClick={() => handleNotificationClick(item)}
                       >
                         {item.avatar ? (
                           <img
                             src={item.avatar}
                             alt={item.title}
-                            className="size-9 rounded-full object-cover"
+                            className="size-9 rounded-full object-cover shrink-0"
                           />
                         ) : (
-                          <span className="inline-flex size-9 items-center justify-center rounded-full bg-muted">
+                          <span className="inline-flex size-9 items-center justify-center rounded-full bg-muted shrink-0">
                             <UserRound className="size-4 text-muted-foreground" />
                           </span>
                         )}
-                        <div className="min-w-0">
-                          <p className="text-sm">
-                            <span className="font-medium">{item.title}</span>{" "}
-                            <span className="text-muted-foreground">{item.message}</span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs text-brown-600 leading-snug">
+                            <span className="font-semibold">{item.title}</span>{" "}
+                            <span className="text-brown-400">{item.message}</span>
                           </p>
-                          <p className="mt-1 text-xs text-muted-foreground">{item.time}</p>
+                          <div className="mt-1 flex items-center justify-between">
+                            <span className="text-[10px] text-muted-foreground">{item.time}</span>
+                            {!item.isRead && (
+                              <span className="size-2 rounded-full bg-destructive inline-block" />
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))
