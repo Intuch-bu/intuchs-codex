@@ -34,7 +34,7 @@ export function AdminProvider({ children }) {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await fetchPosts({ limit: 100 });
+      const data = await fetchPosts({ limit: 100, status: "all" });
       if (data.posts && Array.isArray(data.posts)) {
         setArticles(data.posts);
       } else {

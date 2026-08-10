@@ -16,8 +16,6 @@ function createProfileForm(user) {
     username: user?.username ?? "",
     email: user?.email ?? "",
     profileImage: user?.profileImage ?? user?.profile_pic ?? "",
-    bio: user?.bio ?? "",
-    bioExtra: user?.bioExtra ?? user?.bio_extra ?? "",
   };
 }
 
@@ -110,8 +108,6 @@ function ProfilePage() {
         username: form.username.trim(),
         email: form.email.trim(),
         profileImage: form.profileImage,
-        bio: form.bio,
-        bio_extra: form.bioExtra,
       });
 
       if (!result.ok) {
@@ -213,34 +209,6 @@ function ProfilePage() {
             {errors.email && (
               <p className="text-sm text-destructive">{errors.email}</p>
             )}
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label htmlFor="bio" className="text-base font-medium text-brown-400">
-              Bio
-            </label>
-            <textarea
-              id="bio"
-              rows={4}
-              value={form.bio}
-              onChange={handleChange("bio")}
-              placeholder="Tell readers about yourself..."
-              className="w-full resize-y rounded-lg border border-border bg-white p-3 text-base font-medium text-brown-600 outline-none focus:border-brown-600"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label htmlFor="bioExtra" className="text-base font-medium text-brown-400">
-              Bio Extra
-            </label>
-            <textarea
-              id="bioExtra"
-              rows={4}
-              value={form.bioExtra}
-              onChange={handleChange("bioExtra")}
-              placeholder="Additional details, hobbies, or background..."
-              className="w-full resize-y rounded-lg border border-border bg-white p-3 text-base font-medium text-brown-600 outline-none focus:border-brown-600"
-            />
           </div>
 
           <Button

@@ -1,16 +1,18 @@
+import { SITE_AUTHOR } from "@/constants/site";
+
 function AuthorCard({ author, author_name, author_avatar, author_bio }) {
   const authorName =
     author_name ||
     (typeof author === "object" ? author?.name : author) ||
-    "Author";
+    SITE_AUTHOR.name;
   const authorPic =
     author_avatar ||
     (typeof author === "object" ? author?.avatar : null) ||
-    "";
+    SITE_AUTHOR.avatar;
   const bioText =
     author_bio ||
     (typeof author === "object" ? author?.bio : null) ||
-    "";
+    SITE_AUTHOR.bio;
 
   return (
     <aside className="lg:w-[305px] lg:shrink-0">

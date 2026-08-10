@@ -1,12 +1,16 @@
 import { Link } from "react-router-dom";
 import { DEFAULT_POST_IMAGE } from "@/api/blogApi";
+import { SITE_AUTHOR } from "@/constants/site";
 
 function BlogCard({ id, image, category, title, description, author, author_name, author_avatar, date }) {
   const authorName =
     author_name ||
     (typeof author === "object" ? author?.name : author) ||
-    "Author";
-  const authorPic = author_avatar || (typeof author === "object" ? author?.avatar : null) || "";
+    SITE_AUTHOR.name;
+  const authorPic =
+    author_avatar ||
+    (typeof author === "object" ? author?.avatar : null) ||
+    SITE_AUTHOR.avatar;
   const categoryName =
     typeof category === "object" ? category?.name || "General" : category || "General";
 

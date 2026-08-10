@@ -23,7 +23,7 @@ export async function checkHealth() {
   return data;
 }
 
-export async function fetchPosts({ page = 1, limit = 6, category, keyword } = {}) {
+export async function fetchPosts({ page = 1, limit = 6, category, keyword, status } = {}) {
   const params = { page, limit };
 
   if (category && category !== DEFAULT_CATEGORY && category !== "all") {
@@ -32,6 +32,10 @@ export async function fetchPosts({ page = 1, limit = 6, category, keyword } = {}
 
   if (keyword && keyword.trim()) {
     params.keyword = keyword.trim();
+  }
+
+  if (status) {
+    params.status = status;
   }
 
   const { data } = await axios.get(`${API_BASE_URL}/posts`, { params });
