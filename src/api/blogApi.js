@@ -121,33 +121,73 @@ export async function updateUserProfile(profileData) {
 }
 
 export async function uploadProfilePicture(file) {
-  const headers = await getAuthHeaders();
-  const formData = new FormData();
-  formData.append("file", file);
+  if (!file) throw new Error("No file provided");
 
-  const { data } = await axios.post(`${API_BASE_URL}/users/profile-picture`, formData, {
-    headers: {
-      ...headers,
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData?.user) {
+    throw new Error("Authentication required to upload profile picture");
+  }
 
-  return data;
+  const userId = userData.user.id;
+  const fileExt = file.name.split(".").pop() || "jpg";
+  const fileName = `${userId}-${Date.now()}.${fileExt}`;
+  const filePath = `avatars/${fileName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("profiles")
+    .upload(filePath, file, {
+      contentType: file.type || "image/jpeg",
+      upsert: true,
+    });
+
+  if (uploadError) {
+    console.error("Supabase storage upload error:", uploadError);
+    throw new Error(uploadError.message || "Failed to upload profile picture");
+  }
+
+  const { data: publicUrlData } = supabase.storage
+    .from("profiles")
+    .getPublicUrl(filePath);
+
+  return {
+    message: "Uploaded profile picture successfully",
+    publicUrl: publicUrlData?.publicUrl,
+  };
 }
 
 export async function uploadPostImage(file) {
-  const headers = await getAuthHeaders();
-  const formData = new FormData();
-  formData.append("file", file);
+  if (!file) throw new Error("No file provided");
 
-  const { data } = await axios.post(`${API_BASE_URL}/posts/upload`, formData, {
-    headers: {
-      ...headers,
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData?.user) {
+    throw new Error("Authentication required to upload post image");
+  }
 
-  return data;
+  const userId = userData.user.id;
+  const fileExt = file.name.split(".").pop() || "jpg";
+  const fileName = `post-${userId}-${Date.now()}.${fileExt}`;
+  const filePath = `thumbnails/${fileName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("posts")
+    .upload(filePath, file, {
+      contentType: file.type || "image/jpeg",
+      upsert: true,
+    });
+
+  if (uploadError) {
+    console.error("Supabase storage upload error:", uploadError);
+    throw new Error(uploadError.message || "Failed to upload post image");
+  }
+
+  const { data: publicUrlData } = supabase.storage
+    .from("posts")
+    .getPublicUrl(filePath);
+
+  return {
+    message: "Uploaded post image successfully",
+    publicUrl: publicUrlData?.publicUrl,
+  };
 }
 
 // ─── Comments endpoints ───
