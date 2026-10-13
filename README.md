@@ -1,66 +1,86 @@
 # Intuch's Codex
 
-บล็อกส่วนตัวสำหรับบันทึกการเรียนรู้การพัฒนาเว็บและบทความต่าง ๆ โปรเจกต์นี้สร้างขึ้นเพื่อฝึก React ดังนั้นโค้ดตั้งใจให้เรียบง่าย อ่านตามได้ง่าย และเหมาะกับผู้เริ่มต้น
+Intuch's Codex is a personal learning blog and development journal. It is built with React as a practical project for learning modern web development while keeping the codebase simple, readable, and approachable.
 
-## สิ่งที่มีในโปรเจกต์
+## Features
 
-- หน้ารวมบทความ พร้อมเลือกหมวดหมู่ ค้นหา และโหลดเพิ่ม
-- หน้าอ่านบทความแบบ Markdown
-- ระบบสมัครสมาชิก, login, profile และ reset password แบบ mock ด้วย `localStorage`
-- Responsive navigation สำหรับ desktop และ mobile
+- Browse articles by category
+- Search articles by keyword
+- Load additional articles as needed
+- Read Markdown-based article content
+- Create an account, sign in, manage a profile, and update a password
+- Like articles and post comments
+- View and manage notifications
+- Admin tools for managing articles, categories, drafts, published content, and images
+- Responsive layout for desktop and mobile devices
 
-## เทคโนโลยี
+## Technology Stack
 
 - React 19
 - Vite
 - React Router
 - Tailwind CSS
-- shadcn UI components
-- Axios สำหรับเรียก Blog API
+- shadcn/ui and Radix UI
+- Supabase Authentication
+- Axios for Blog API requests
+- React Markdown
 
-## เริ่มต้นใช้งาน
+## Requirements
 
-ต้องมี Node.js 18 ขึ้นไปและ npm
+- Node.js 20.19+ or 22.12+
+- npm
+
+## Getting Started
+
+1. Install the dependencies:
+
+   ```bash
+   npm install
+   ```
+
+2. Create a `.env.local` file in the project root:
+
+   ```env
+   VITE_API_BASE_URL=https://blogpost-server-flax.vercel.app
+   VITE_SUPABASE_URL=https://your-project.supabase.co
+   VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+   ```
+
+   `VITE_API_BASE_URL` is optional and defaults to the public Blog API URL shown above. The Supabase values are required for authentication and member features.
+
+3. Start the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+4. Open the URL displayed in the terminal. The default address is `http://localhost:5173`.
+
+## Available Scripts
 
 ```bash
-npm install
-npm run dev
+npm run dev       # Start the development server
+npm run lint      # Run ESLint
+npm run build     # Create a production build
+npm run preview   # Preview the production build locally
 ```
 
-เปิด URL ที่ Vite แสดงใน terminal (ปกติคือ `http://localhost:5173`)
-
-## คำสั่งที่ใช้บ่อย
-
-```bash
-npm run dev
-npm run lint
-npm run build
-npm run preview
-```
-
-## โครงสร้างโปรเจกต์
+## Project Structure
 
 ```text
 src/
-├── api/                  # ฟังก์ชันเรียก Blog API
-├── assets/               # รูปภาพที่ใช้ในหน้าเว็บ เช่น hero.jpg
-├── components/           # React components แยกตามหน้าที่
-│   ├── blog/             # ส่วนของหน้า list และรายละเอียดบทความ
-│   ├── layout/           # Navbar และ Footer
-│   ├── member/           # Sidebar และ layout ของ member pages
-│   └── ui/               # shadcn UI components (ไม่แก้ถ้าไม่จำเป็น)
-├── constants/            # ข้อมูลคงที่ เช่น category และ author fallback
-├── context/              # React Context สำหรับ auth
-├── lib/                  # ฟังก์ชันช่วยเหลือและ mock auth
-├── pages/                # Component ของแต่ละ route
-├── App.jsx               # กำหนด routes
-└── main.jsx              # จุดเริ่มต้นของแอป
+├── api/                  # Functions for communicating with the Blog API
+├── assets/               # Local assets such as the hero image
+├── components/           # Reusable React components
+│   ├── blog/             # Article list, detail, and interaction components
+│   ├── layout/           # Shared navigation and footer
+│   ├── member/           # Member page layouts and navigation
+│   └── ui/               # shadcn/ui components
+├── constants/            # Shared application constants
+├── context/              # React Context providers for auth and admin state
+├── lib/                  # Shared utilities and the Supabase client
+├── pages/                # Route-level page components
+│   └── admin/            # Admin article, category, and notification pages
+├── App.jsx               # Application routes
+└── main.jsx              # Application entry point
 ```
-
-## ข้อมูลสำคัญสำหรับผู้เรียน
-
-- บทความมาจาก external API ใน `src/api/blogApi.js`
-- auth เป็นเพียง mock เพื่อการเรียนรู้ ข้อมูลอยู่ใน browser `localStorage` ไม่ใช่ระบบสำหรับ production
-- รักษาไฟล์ `src/assets/hero.jpg` ไว้ เพราะ `HeroSection` ใช้แสดงภาพ hero
-- อ่านกติกาการแก้โค้ดสำหรับ AI ได้ที่ [AGENT.md](AGENT.md)
-- รายละเอียดการ refactor ล่าสุดอยู่ที่ [docs/refactor-report.md](docs/refactor-report.md)
